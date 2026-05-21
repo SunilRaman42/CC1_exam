@@ -39,10 +39,22 @@ def download_latest_hdx():
     out_path = OUT_DIR / filename
     
     print(f"Downloading from: {download_url}")
-    r = requests.get(download_url)
-    with open(out_path, "wb") as f:
-        f.write(r.content)
+    with requests.get(download_url, stream=True) as r:
+        r.raise_for_status()
+        with open(out_path, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+    
     print(f"✓ Saved to {out_path}")
+    
+    # Verify integrity
+    try:
+        import pandas as pd
+        df = pd.read_excel(out_path, nrows=1)
+        print("✓ Integrity check passed: File is a valid Excel archive.")
+    except Exception as e:
+        print(f"❌ Integrity check failed: {e}")
 
 if __name__ == "__main__":
     download_latest_hdx()
