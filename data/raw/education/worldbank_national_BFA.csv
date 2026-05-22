@@ -1,0 +1,238 @@
+iso3,indicator_code,indicator_name,year,value,source
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",1975,8.82999992370605,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",1991,13.5699996948242,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",1996,12.8500003814697,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2003,21.8199996948242,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2005,23.5200004577637,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2006,22.4699993133545,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2007,27.8799991607666,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2014,34.5999984741211,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2018,39.3499984741211,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2019,29.6599998474121,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2021,36.9700012207031,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2022,40.9199981689453,WorldBank
+BFA,SE.ADT.LITR.ZS,"Adult literacy rate, 15+",2023,41.5670909952631,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,1999,21.8901290893555,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2000,23.8220405578613,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2001,25.1767692565918,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2002,25.9655895233154,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2003,27.5287399291992,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2004,28.8950691223144,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2005,30.4755191802979,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2006,31.8527793884277,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2007,33.9733009338379,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2008,37.6760787963867,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2009,42.5357513427734,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2010,45.96010978957,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2012,55.8972269217297,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2013,60.8494277141905,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2014,59.5950909640897,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2015,60.3448419249273,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2016,60.1264533975278,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2017,61.5863350030506,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2018,62.608203204783,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2019,61.6091078457616,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2020,61.8698150998586,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2021,63.7436352801156,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2022,58.291190218396,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2023,51.6947761170006,WorldBank
+BFA,SE.PRM.CMPT.ZS,Primary completion rate,2024,51.9892903102133,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",1992,27.70352,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",1993,28.68706,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",1994,29.91303,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",1995,31.53515,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",1998,34.98034,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",1999,35.48973,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2000,36.33372,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2001,37.26342,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2002,36.72142,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2003,38.65198,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2004,41.14892,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2005,45.7476,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2006,48.74733,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2007,54.03414,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2008,59.9701,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2009,62.7928,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2010,59.91302,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2011,64.89106,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2012,65.68288,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2013,66.59063,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2014,67.7983,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2015,69.38962,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2016,75.20863,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2017,76.42387,WorldBank
+BFA,SE.PRM.NENR,"Net enrolment rate, primary",2018,78.64517,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",1992,21.8341,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",1993,22.70059,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",1994,23.67345,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",1995,24.94242,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",1998,28.29705,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",1999,29.01118,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2000,29.99879,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2001,31.10795,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2002,31.05662,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2003,32.99755,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2004,35.84748,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2005,40.46028,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2006,43.7204,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2007,49.09273,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2008,55.53211,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2009,58.93276,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2010,57.39892,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2011,62.77919,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2012,63.99954,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2013,65.31431,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2014,66.49125,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2015,68.14274,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2016,74.06397,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2017,75.4478,WorldBank
+BFA,SE.PRM.NENR.FE,"Net enrolment rate, primary, female",2018,77.69237,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",1992,33.39627,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",1993,34.49254,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",1994,35.96207,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",1995,37.92465,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",1998,41.46264,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",1999,41.77467,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2000,42.47958,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2001,43.23467,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2002,42.2182,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2003,44.13785,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2004,46.28998,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2005,50.87188,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2006,53.61633,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2007,58.81916,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2008,64.26456,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2009,66.52429,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2010,62.34036,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2011,66.92852,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2012,67.30602,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2013,67.82096,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2014,69.05833,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2015,70.59215,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2016,76.31334,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2017,77.36641,WorldBank
+BFA,SE.PRM.NENR.MA,"Net enrolment rate, primary, male",2018,79.56541,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",1991,27.18227,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",1992,27.70352,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",1993,28.68706,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",1994,29.91303,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",1995,31.53515,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",1998,34.98034,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",1999,35.51457,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2000,36.7463,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2001,37.77186,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2002,36.72142,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2003,39.04855,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2004,41.14892,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2005,45.97286,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2006,49.62343,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2007,54.95361,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2008,61.00304,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2009,63.89452,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2011,64.89106,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2012,66.07414,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2013,66.97207,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2014,68.30377,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2015,69.95995,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2016,75.85293,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2017,77.00507,WorldBank
+BFA,SE.PRM.TENR,"Adjusted net enrolment rate, primary",2018,79.34168,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2000,1294621.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2001,1299670.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2002,1346670.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2003,1327834.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2004,1313496.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2005,1239744.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2006,1191410.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2007,1101634.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2008,989914.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2009,946050.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2010,1099622.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2011,1009021.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2012,1017434.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2013,1027328.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2014,1035678.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2015,1033081.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2016,895083.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2017,896835.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2018,856576.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2019,929223.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2020,1053836.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2021,1098540.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2022,1244709.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2023,1647302.0,WorldBank
+BFA,SE.PRM.UNER,"Children out of school, primary (number)",2024,1363187.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2000,699156.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2001,701906.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2002,721578.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2003,714186.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2004,705697.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2005,671354.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2006,647199.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2007,603476.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2008,544598.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2009,517592.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2010,577583.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2011,528618.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2012,527864.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2013,527902.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2014,533023.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2015,530932.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2016,461561.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2017,459926.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2018,440020.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2019,470347.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2020,522928.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2021,539690.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2022,606933.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2023,799663.0,WorldBank
+BFA,SE.PRM.UNER.FE,"Children out of school, primary, female",2024,659756.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2000,595465.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2001,597764.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2002,625092.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2003,613648.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2004,607799.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2005,568390.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2006,544211.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2007,498158.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2008,445316.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2009,428458.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2010,522039.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2011,480403.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2012,489570.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2013,499426.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2014,502655.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2015,502149.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2016,433522.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2017,436909.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2018,416556.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2019,458876.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2020,530908.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2021,558850.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2022,637776.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2023,847639.0,WorldBank
+BFA,SE.PRM.UNER.MA,"Children out of school, primary, male",2024,703431.0,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1983,2.46756,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1985,2.99355,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1986,3.50964,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1989,5.27344,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1992,6.67478,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1993,6.8609,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1994,6.86524,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",1999,8.63831,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2001,7.98013,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2003,9.48721,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2004,10.55512,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2005,11.39514,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2006,12.2104,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2007,12.92052,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2008,14.773,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2009,15.822,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2010,16.48295,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2011,18.46052,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2012,19.74492,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2013,21.66185,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2015,26.53378,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2016,28.10485,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2017,29.14227,WorldBank
+BFA,SE.SEC.NENR,"Net enrolment rate, secondary",2018,31.00148,WorldBank
