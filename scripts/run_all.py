@@ -99,9 +99,9 @@ def main():
         print(f"\n  Outputs:")
         print(f"    data/clean/{iso3}_vulnerability.csv")
         print(f"    data/clean/{iso3}_national_trends.csv")
-        print(f"    assets/data.geojson")
-        print(f"    assets/trends.json")
-        print(f"    assets/insights.json")
+        print(f"    artifacts/data.geojson")
+        print(f"    artifacts/trends.json")
+        print(f"    artifacts/insights.json")
         print(f"\n  Next: open index.html or push to GitHub Pages")
     print(f"{'='*55}\n")
 
