@@ -13,6 +13,7 @@ import json
 import argparse
 import os
 import pandas as pd
+import numpy as np
 import geopandas as gpd
 from pathlib import Path
 from shapely.geometry import mapping
@@ -83,8 +84,8 @@ def build_geojson(vuln: pd.DataFrame, boundaries: gpd.GeoDataFrame) -> dict:
 
 def build_trends_json(trends: pd.DataFrame) -> list[dict]:
     """Convert national trends DataFrame to a JSON array for the chart."""
-    # Round all numeric columns
-    trends = trends.round(3)
+    # Round all numeric columns and replace NaN with None for valid JSON (null)
+    trends = trends.round(3).replace({np.nan: None})
     return trends.to_dict(orient="records")
 
 
