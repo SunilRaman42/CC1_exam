@@ -443,13 +443,13 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   <!-- Header -->
   <header class="header">
     <div class="header-left">
-      <div class="kicker">Burkina Faso · Education Vulnerability Index · 2016–2024</div>
+      <div class="kicker">Burkina Faso · Education Vulnerability Index · 2015–2026</div>
       <h1 class="headline">
         Conflict is closing schools faster than<br>
         <em>they can be rebuilt</em>
       </h1>
       <p class="subhead">
-        Click any province to see its vulnerability profile and an AI-generated situation summary
+        EVI (Education Vulnerability Index) measures the threat of conflict to school access on a (0-100) scale. Click any province for its profile and AI briefing.
       </p>
     </div>
     <div class="stats">
@@ -493,6 +493,9 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
           <div class="legend-item"><div class="legend-dot" style="background:var(--tier-medium)"></div>Medium</div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--tier-low)"></div>Low</div>
         </div>
+        <div style="font-size: 10px; color: var(--ink-muted); margin-top: 14px; font-style: italic; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 10px;">
+          EVI measures the risk of school closure due to conflict, where higher scores indicate greater threat.
+        </div>
       </div>
 
       <!-- Province detail -->
@@ -505,7 +508,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 
       <!-- Trend sparkline -->
       <div class="chart-panel">
-        <div class="chart-title">National conflict events · 2016–2024</div>
+        <div class="chart-title" id="chartTitle">National conflict events · 2016–2024</div>
         <canvas id="trendChart"></canvas>
       </div>
 
@@ -540,6 +543,7 @@ const TIER_COLORS = {
   high:           "#E07B3B",
   high_priority:  "#E07B3B",
   medium:         "#F0C060",
+  medium_priority: "#F0C060",
   low:            "#A8C5A0",
   lower_priority: "#A8C5A0",
   unknown:        "#C8C0B0",
@@ -723,8 +727,11 @@ function updateHeaderStats(features) {
 function resetDetailPanel() {
   document.getElementById("detailPanel").innerHTML = `
     <div class="panel-label">Province detail</div>
-    <p class="detail-empty">Select a province on the map to see its vulnerability profile and an AI-generated situation briefing.</p>
+    <p class="detail-empty">Select a province on the map to see its vulnerability score, conflict metrics, and an AI-generated situation briefing.</p>
   `;
+  if (trendsData && trendsData.length) {
+    drawTrend(trendsData, "National conflict events · 2016–2024");
+  }
 }
 
 function showProvinceDetail(props) {
@@ -778,6 +785,31 @@ function showProvinceDetail(props) {
 
   // ── Trigger AI narrative ──────────────────────────────────────────────────
   generateSituationBriefing(props);
+
+  // ── Update Trend Chart for this province ──────────────────────────────────
+  const provinceName = props.admin2 || props.region || props.admin1 || "Unknown";
+  const provinceTrend = [];
+  const years = Object.keys(allFeatures).sort((a,b) => a-b);
+  
+  years.forEach(yr => {
+    // Look for this province in other years
+    const feature = allFeatures[yr].find(f => 
+      (f.properties.admin2 && props.admin2 && f.properties.admin2 === props.admin2) ||
+      (f.properties.region && props.region && f.properties.region === props.region)
+    );
+    if (feature) {
+      provinceTrend.push({
+        year: yr,
+        total_events: feature.properties.events || 0
+      });
+    }
+  });
+
+  if (provinceTrend.length > 0) {
+    const startYear = provinceTrend[0].year;
+    const endYear   = provinceTrend[provinceTrend.length - 1].year;
+    drawTrend(provinceTrend, `${provinceName} conflict events · ${startYear}–${endYear}`);
+  }
 }
 
 
@@ -820,12 +852,12 @@ async function generateSituationBriefing(props) {
   }
 
   // No API key — show data-only fallback
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_KEY_HERE") {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_KEY_HERE" || GEMINI_API_KEY === "KEY_NOT_SET") {
     textEl.textContent =
       `${name} is classified ${tier} priority (EVI ${(score*100).toFixed(0)}/100). ` +
-      `${events} conflict events were recorded in ${year}, resulting in ${fatal} fatalities. ` +
-      `[Add your free Gemini key to index.html to enable AI-generated briefings — see aistudio.google.com/apikey]`;
+      `${events} conflict events were recorded in ${year}, resulting in ${fatal} fatalities. `;
     textEl.classList.remove("loading");
+    disclaimerEl.innerHTML = "AI summary disabled. Set <code>GEMINI_API_KEY</code> in localStorage to enable.";
     return;
   }
 
@@ -885,9 +917,14 @@ Requirements:
 // TREND SPARKLINE
 // ═══════════════════════════════════════════════════════
 
-function drawTrend(data) {
+function drawTrend(data, title) {
   const canvas = document.getElementById("trendChart");
   if (!canvas || !data.length) return;
+
+  if (title) {
+    document.getElementById("chartTitle").textContent = title;
+  }
+  
   const ctx = canvas.getContext("2d");
   const W   = canvas.width  = canvas.offsetWidth;
   const H   = canvas.height = 60;
