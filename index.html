@@ -101,7 +101,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   font-size: clamp(22px, 3vw, 36px);
   font-weight: 700;
   line-height: 1;
-  color: var(--accent);
+  color: var(--ink);
 }
 .stat-num.yellow { color: #F0C060; }
 .stat-label {
@@ -109,7 +109,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(245,240,232,0.5);
+  color: var(--ink-muted);
   margin-top: 2px;
 }
 
@@ -637,12 +637,12 @@ function renderSchools() {
   schoolsLayer = L.geoJSON(schoolsData, {
     pointToLayer: (feature, latlng) => {
       return L.circleMarker(latlng, {
-        radius: 2,
-        fillColor: "#1A1410",
+        radius: 3,
+        fillColor: "#555",
         color: "#fff",
-        weight: 0.5,
-        opacity: 0.8,
-        fillOpacity: 0.8
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.7
       });
     },
     onEachFeature: (feature, layer) => {
@@ -795,32 +795,34 @@ async function generateSituationBriefing(props) {
   textEl.classList.remove("loading");
 }
 
-function drawTrend(data) {
+function drawTrend(data, admin2 = null) {
   const canvas = document.getElementById("trendChart");
   if (!canvas || !data.length) return;
   const ctx = canvas.getContext("2d");
   const W = canvas.width = canvas.offsetWidth;
   const H = canvas.height = 60;
-  const vals = data.map(d => d.total_events || 0);
+  let plotData = admin2 ? data.filter(d => d.Admin2 === admin2) : data;
+  if (!plotData.length) plotData = data;
+  const vals = plotData.map(d => d.total_events || 0);
   const maxV = Math.max(...vals);
   const minV = Math.min(...vals);
   const pad = { l: 8, r: 8, t: 8, b: 18 };
   const iW = W - pad.l - pad.r;
   const iH = H - pad.t - pad.b;
-  const x = (i) => pad.l + (i / (vals.length - 1)) * iW;
+  const x = (i) => pad.l + (i / (plotData.length - 1)) * iW;
   const y = (v) => pad.t + (1 - (v - minV) / (maxV - minV || 1)) * iH;
 
   ctx.beginPath();
   ctx.moveTo(x(0), y(vals[0]));
-  vals.forEach((v, i) => ctx.lineTo(x(i), y(v)));
-  ctx.lineTo(x(vals.length - 1), H - pad.b);
+  plotData.forEach((d, i) => ctx.lineTo(x(i), y(d.total_events)));
+  ctx.lineTo(x(plotData.length - 1), H - pad.b);
   ctx.lineTo(x(0), H - pad.b);
   ctx.fillStyle = "rgba(192,57,43,0.12)";
   ctx.fill();
 
   ctx.beginPath();
   ctx.moveTo(x(0), y(vals[0]));
-  vals.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+  plotData.forEach((d, i) => ctx.lineTo(x(i), y(d.total_events)));
   ctx.strokeStyle = "#C0392B";
   ctx.lineWidth = 1.5;
   ctx.stroke();
