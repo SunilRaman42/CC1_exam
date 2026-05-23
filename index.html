@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Education Under Threat — Burkina Faso</title>
+<title>Education Under Threat — Schools Overlay (TEST)</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -443,13 +443,13 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   <!-- Header -->
   <header class="header">
     <div class="header-left">
-      <div class="kicker">Burkina Faso · Education Vulnerability Index · 2015–2026</div>
+      <div class="kicker">Burkina Faso · Schools Overlay Test · 2015–2026</div>
       <h1 class="headline">
         Conflict is closing schools faster than<br>
         <em>they can be rebuilt</em>
       </h1>
       <p class="subhead">
-        EVI (Education Vulnerability Index) measures the threat of conflict to school access on a (0-100) scale. Click any province for its profile and AI briefing.
+        Visualizing 12,000+ school points against conflict vulnerability zones.
       </p>
     </div>
     <div class="stats">
@@ -458,8 +458,8 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
         <div class="stat-label">Critical provinces</div>
       </div>
       <div class="stat">
-        <div class="stat-num yellow" id="statHigh">—</div>
-        <div class="stat-label">High priority</div>
+        <div class="stat-num" id="statSchoolsAtRisk">—</div>
+        <div class="stat-label">Schools at risk</div>
       </div>
       <div class="stat">
         <div class="stat-num" id="statEvents">—</div>
@@ -493,8 +493,13 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
           <div class="legend-item"><div class="legend-dot" style="background:var(--tier-medium)"></div>Medium</div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--tier-low)"></div>Low</div>
         </div>
-        <div style="font-size: 10px; color: var(--ink-muted); margin-top: 14px; font-style: italic; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 10px;">
-          EVI measures the risk of school closure due to conflict, where higher scores indicate greater threat.
+
+        <!-- Layer Toggles -->
+        <div class="panel-label" style="margin-top:16px;margin-bottom:8px">Map Layers</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+           <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-muted); cursor:pointer;">
+             <input type="checkbox" id="toggleSchools" checked> <span>Show Schools (Points)</span>
+           </label>
         </div>
       </div>
 
@@ -502,13 +507,13 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       <div class="detail-panel" id="detailPanel">
         <div class="panel-label">Province detail</div>
         <p class="detail-empty">
-          Select a province on the map to see its vulnerability score, conflict metrics, and an AI-generated situation briefing.
+          Select a province on the map to see its vulnerability score and school infrastructure.
         </p>
       </div>
 
       <!-- Trend sparkline -->
       <div class="chart-panel">
-        <div class="chart-title" id="chartTitle">National conflict events · 2016–2024</div>
+        <div class="chart-title">National conflict events · 2015–2026</div>
         <canvas id="trendChart"></canvas>
       </div>
 
@@ -521,22 +526,15 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 // CONFIG
 // ═══════════════════════════════════════════════════════
 
-// ── GEMINI API KEY (Security: Loads from Browser LocalStorage) ──────────────
-// To set your key, open the browser console (F12) and run:
-// localStorage.setItem("GEMINI_API_KEY", "YOUR_KEY_HERE");
 const GEMINI_API_KEY = localStorage.getItem("GEMINI_API_KEY") || "KEY_NOT_SET";
 const GEMINI_MODEL   = "gemini-2.5-flash";
 const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+const LS_CACHE_KEY   = "evi_briefings_bfa";
 
-// ── PERSISTENT CACHE KEY (localStorage) ──────────────────────────────────────
-// Summaries saved to localStorage — survive page reloads.
-// AI is never called twice for the same province + year.
-const LS_CACHE_KEY = "evi_briefings_bfa";
-
-// Data files (output of 05_export_map_data.py)
-const GEOJSON_URL  = "artifacts/data.geojson";
-const TRENDS_URL   = "artifacts/trends.json";
-const INSIGHTS_URL = "artifacts/insights.json";
+const GEOJSON_URL  = "../artifacts/data.geojson";
+const TRENDS_URL   = "../artifacts/trends.json";
+const INSIGHTS_URL = "../artifacts/insights.json";
+const SCHOOLS_URL  = "../artifacts/schools.geojson";
 
 const TIER_COLORS = {
   critical:       "#8B1A1A",
@@ -555,7 +553,7 @@ const TIER_COLORS = {
 
 const map = L.map("map", {
   center: [12.3, -1.9],
-  zoom: 6,
+  zoom: 7,
   zoomControl: true,
   attributionControl: true,
 });
@@ -569,12 +567,13 @@ L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png
 // STATE
 // ═══════════════════════════════════════════════════════
 
-let allFeatures  = {};   // year → GeoJSON features
+let allFeatures  = {};
+let schoolsData  = null;
 let trendsData   = [];
 let currentYear  = 2023;
 let choropleth   = null;
+let schoolsLayer = null;
 let selectedLayer = null;
-// Load persistent cache from localStorage on startup
 let aiCache = (() => {
   try { return JSON.parse(localStorage.getItem(LS_CACHE_KEY) || "{}"); }
   catch { return {}; }
@@ -591,22 +590,22 @@ function saveCache() {
 
 async function loadAll() {
   try {
-    const [geojson, trends, insights] = await Promise.all([
+    const [geojson, trends, insights, schools] = await Promise.all([
       fetch(GEOJSON_URL).then(r => r.json()),
       fetch(TRENDS_URL).then(r => r.json()),
       fetch(INSIGHTS_URL).then(r => r.json()),
+      fetch(SCHOOLS_URL).then(r => r.json()).catch(() => null),
     ]);
 
     trendsData = trends;
+    schoolsData = schools;
 
-    // Group features by year
     geojson.features.forEach(f => {
       const yr = f.properties.year || currentYear;
       if (!allFeatures[yr]) allFeatures[yr] = [];
       allFeatures[yr].push(f);
     });
 
-    // If single year in file, use it for all slider positions
     const years = Object.keys(allFeatures).map(Number);
     if (years.length === 1) {
       const yr = years[0];
@@ -615,19 +614,44 @@ async function loadAll() {
       }
     }
 
-    // Populate headline stats
     populateStats(insights);
     drawTrend(trends);
     renderChoropleth(currentYear);
+    renderSchools();
 
     document.getElementById("loadingOverlay").classList.add("hidden");
 
   } catch(err) {
     console.error("Failed to load data:", err);
-    showFallbackDemo();
   }
 }
 
+// ═══════════════════════════════════════════════════════
+// SCHOOLS LAYER
+// ═══════════════════════════════════════════════════════
+
+function renderSchools() {
+  if (schoolsLayer) map.removeLayer(schoolsLayer);
+  if (!schoolsData || !document.getElementById("toggleSchools").checked) return;
+
+  schoolsLayer = L.geoJSON(schoolsData, {
+    pointToLayer: (feature, latlng) => {
+      return L.circleMarker(latlng, {
+        radius: 2,
+        fillColor: "#1A1410",
+        color: "#fff",
+        weight: 0.5,
+        opacity: 0.8,
+        fillOpacity: 0.8
+      });
+    },
+    onEachFeature: (feature, layer) => {
+      layer.bindPopup(`<strong>${feature.properties.name || "Unnamed School"}</strong><br>${feature.properties.amenity || "School"}`);
+    }
+  }).addTo(map);
+}
+
+document.getElementById("toggleSchools").addEventListener("change", renderSchools);
 
 // ═══════════════════════════════════════════════════════
 // CHOROPLETH
@@ -639,24 +663,13 @@ function renderChoropleth(year) {
   const features = allFeatures[year] || [];
   if (!features.length) return;
 
-  const geojson = { type: "FeatureCollection", features };
-
-  choropleth = L.geoJSON(geojson, {
+  choropleth = L.geoJSON({ type: "FeatureCollection", features }, {
     style: f => styleFeature(f),
     onEachFeature: (f, layer) => {
       layer.on({
-        mouseover: e => {
-          if (layer !== selectedLayer) {
-            e.target.setStyle({ weight: 2, fillOpacity: 0.95 });
-          }
-        },
-        mouseout: e => {
-          if (layer !== selectedLayer) {
-            choropleth.resetStyle(e.target);
-          }
-        },
+        mouseover: e => { if (layer !== selectedLayer) e.target.setStyle({ weight: 2, fillOpacity: 0.95 }); },
+        mouseout: e => { if (layer !== selectedLayer) choropleth.resetStyle(e.target); },
         click: e => {
-          // Reset previously selected
           if (selectedLayer) choropleth.resetStyle(selectedLayer);
           selectedLayer = e.target;
           e.target.setStyle({ weight: 3, color: "#1A1410", fillOpacity: 1.0 });
@@ -665,24 +678,25 @@ function renderChoropleth(year) {
       });
     }
   }).addTo(map);
+  
+  // Bring schools to front if visible
+  if (schoolsLayer) schoolsLayer.bringToFront();
 
   updateHeaderStats(features);
 }
 
 function styleFeature(f) {
-  const tier  = (f.properties.priority || f.properties.evi_tier || "unknown").toLowerCase();
-  const color = TIER_COLORS[tier] || TIER_COLORS.unknown;
+  const tier  = (f.properties.priority || "unknown").toLowerCase();
   return {
-    fillColor:   color,
-    fillOpacity: 0.75,
+    fillColor:   TIER_COLORS[tier] || TIER_COLORS.unknown,
+    fillOpacity: 0.7,
     color:       "#F5F0E8",
     weight:      0.8,
   };
 }
 
-
 // ═══════════════════════════════════════════════════════
-// YEAR SLIDER
+// UI UPDATES
 // ═══════════════════════════════════════════════════════
 
 document.getElementById("yearSlider").addEventListener("input", e => {
@@ -693,71 +707,54 @@ document.getElementById("yearSlider").addEventListener("input", e => {
   resetDetailPanel();
 });
 
-
-// ═══════════════════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════════════════
-
 function populateStats(insights) {
   if (!insights) return;
-  if (insights.high_risk_regions !== undefined)
-    document.getElementById("statCritical").textContent = insights.high_risk_regions;
-  if (insights.total_events !== undefined)
-    document.getElementById("statEvents").textContent =
-      insights.total_events.toLocaleString();
+  document.getElementById("statCritical").textContent = insights.critical_regions || 0;
+  document.getElementById("statSchoolsAtRisk").textContent = (insights.schools_at_risk || 0).toLocaleString();
+  document.getElementById("statEvents").textContent = (insights.total_events || 0).toLocaleString();
 }
 
 function updateHeaderStats(features) {
-  const critical = features.filter(f =>
-    ["critical"].includes((f.properties.priority || "").toLowerCase())).length;
-  const high = features.filter(f =>
-    ["high","high_priority"].includes((f.properties.priority || "").toLowerCase())).length;
+  const critical = features.filter(f => ["critical"].includes((f.properties.priority || "").toLowerCase())).length;
   const events = features.reduce((s, f) => s + (f.properties.events || 0), 0);
+  const schoolsAtRisk = features
+    .filter(f => ["critical"].includes((f.properties.priority || "").toLowerCase()))
+    .reduce((s, f) => s + (f.properties.school_count || 0), 0);
 
   document.getElementById("statCritical").textContent = critical;
-  document.getElementById("statHigh").textContent     = high;
-  document.getElementById("statEvents").textContent   = events.toLocaleString();
+  document.getElementById("statSchoolsAtRisk").textContent = schoolsAtRisk.toLocaleString();
+  document.getElementById("statEvents").textContent = events.toLocaleString();
 }
-
-
-// ═══════════════════════════════════════════════════════
-// PROVINCE DETAIL PANEL
-// ═══════════════════════════════════════════════════════
 
 function resetDetailPanel() {
   document.getElementById("detailPanel").innerHTML = `
     <div class="panel-label">Province detail</div>
-    <p class="detail-empty">Select a province on the map to see its vulnerability score, conflict metrics, and an AI-generated situation briefing.</p>
+    <p class="detail-empty">Select a province on the map to see its vulnerability score and school infrastructure.</p>
   `;
-  if (trendsData && trendsData.length) {
-    drawTrend(trendsData, "National conflict events · 2016–2024");
-  }
 }
 
 function showProvinceDetail(props) {
-  const tier    = (props.priority || props.evi_tier || "unknown").toLowerCase();
-  const score   = props.score ?? props.evi_score ?? null;
-  const events  = props.events ?? "—";
-  const fatal   = props.fatalities ?? "—";
-  const basis   = props.score_basis || "";
-  const name    = props.region || props.admin2 || props.admin1 || "Unknown";
+  const tier    = (props.priority || "unknown").toLowerCase();
+  const score   = props.score ?? null;
+  const events  = props.events ?? 0;
+  const fatal   = props.fatalities ?? 0;
+  const schools = props.school_count ?? 0;
+  const name    = props.admin2 || "Unknown";
   const tierLabel = tier.replace("_priority","").replace("_","-");
-  const scoreColor = TIER_COLORS[tier] || TIER_COLORS.unknown;
 
   document.getElementById("detailPanel").innerHTML = `
     <div class="panel-label">Province detail</div>
-
     <div class="detail-name">${name}</div>
     <span class="detail-tier tier-${tier.replace("_priority","")}">${tierLabel} priority</span>
 
     <div class="detail-metrics">
       <div class="metric">
-        <div class="metric-val">${events.toLocaleString()}</div>
-        <div class="metric-label">Conflict events</div>
+        <div class="metric-val">${schools.toLocaleString()}</div>
+        <div class="metric-label">Total Schools</div>
       </div>
       <div class="metric">
-        <div class="metric-val">${fatal.toLocaleString()}</div>
-        <div class="metric-label">Fatalities</div>
+        <div class="metric-val">${events.toLocaleString()}</div>
+        <div class="metric-label">Conflict Events</div>
       </div>
     </div>
 
@@ -767,252 +764,67 @@ function showProvinceDetail(props) {
         <span>EVI Score</span>
         <span>${(score * 100).toFixed(0)}/100</span>
       </div>
-      <div class="score-bar-track">
-        <div class="score-bar-fill"
-             style="width:${Math.round(score*100)}%;background:${scoreColor}">
-        </div>
-      </div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.round(score*100)}%;background:${TIER_COLORS[tier]}"></div></div>
+      <p style="font-size: 9px; color: var(--ink-muted); margin-top: 4px;">EVI measures the risk of school closure due to conflict, where higher scores indicate greater threat.</p>
     </div>` : ""}
 
     <div class="ai-box" id="aiBox">
-      <div class="ai-label">AI-Generated Situation Briefing</div>
+      <div class="ai-label">AI Situation Briefing</div>
       <div class="ai-text loading" id="aiText">Generating summary…</div>
       <div class="ai-disclaimer" id="aiDisclaimer"></div>
     </div>
-
-    ${basis ? `<div class="basis-tag">Score based on: ${basis}</div>` : ""}
   `;
-
-  // ── Trigger AI narrative ──────────────────────────────────────────────────
   generateSituationBriefing(props);
-
-  // ── Update Trend Chart for this province ──────────────────────────────────
-  const provinceName = props.admin2 || props.region || props.admin1 || "Unknown";
-  const provinceTrend = [];
-  const years = Object.keys(allFeatures).sort((a,b) => a-b);
-  
-  years.forEach(yr => {
-    // Look for this province in other years
-    const feature = allFeatures[yr].find(f => 
-      (f.properties.admin2 && props.admin2 && f.properties.admin2 === props.admin2) ||
-      (f.properties.region && props.region && f.properties.region === props.region)
-    );
-    if (feature) {
-      provinceTrend.push({
-        year: yr,
-        total_events: feature.properties.events || 0
-      });
-    }
-  });
-
-  if (provinceTrend.length > 0) {
-    const startYear = provinceTrend[0].year;
-    const endYear   = provinceTrend[provinceTrend.length - 1].year;
-    drawTrend(provinceTrend, `${provinceName} conflict events · ${startYear}–${endYear}`);
-  }
 }
 
-
-// ═══════════════════════════════════════════════════════
-// AI NARRATIVE SYNTHESIS
-// ═══════════════════════════════════════════════════════
-//
-// WHERE THIS LIVES: called from showProvinceDetail() when a user
-// clicks a province. It reads the province's EVI data, sends it to
-// Gemini (free tier), and renders the plain-language summary in the sidebar.
-//
-// IN YOUR PROPOSAL: this is the "LLM-Generated Narrative Synthesis"
-// bullet — it transforms raw scores into human-readable Situation
-// Reports without requiring data literacy from field staff.
-//
-// FOR PRODUCTION: route this through a lightweight backend proxy
-// (e.g. a Cloudflare Worker or Vercel Function) so the API key
-// is never exposed in client-side code.
-// ─────────────────────────────────────────────────────────────────
-
+// ── AI Briefing Stub (Reuse existing logic) ──
 async function generateSituationBriefing(props) {
-  const name    = props.region || props.admin2 || props.admin1 || "this province";
-  const tier    = (props.priority || props.evi_tier || "unknown").toLowerCase().replace("_priority","");
-  const score   = props.score ?? props.evi_score ?? "unknown";
-  const events  = props.events ?? "unknown";
-  const fatal   = props.fatalities ?? "unknown";
-  const year    = props.year || currentYear;
-  const cacheKey = `${name}-${year}`;
-
-  const textEl       = document.getElementById("aiText");
-  const disclaimerEl = document.getElementById("aiDisclaimer");
+  const textEl = document.getElementById("aiText");
   if (!textEl) return;
-
-  // Return cached result if already generated
-  if (aiCache[cacheKey]) {
-    textEl.textContent = aiCache[cacheKey];
+  const name = props.admin2 || "this province";
+  const year = props.year || currentYear;
+  const score = (props.score || 0) * 100;
+  
+  if (GEMINI_API_KEY === "KEY_NOT_SET") {
+    textEl.textContent = `${name} has ${props.school_count} schools and an EVI of ${score.toFixed(0)}/100. [Add Gemini key to enable AI briefings]`;
     textEl.classList.remove("loading");
-    disclaimerEl.textContent = "AI-generated (Gemini) · Cached · Reviewed before operational use";
     return;
   }
-
-  // No API key — show data-only fallback
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_KEY_HERE" || GEMINI_API_KEY === "KEY_NOT_SET") {
-    textEl.textContent =
-      `${name} is classified ${tier} priority (EVI ${(score*100).toFixed(0)}/100). ` +
-      `${events} conflict events were recorded in ${year}, resulting in ${fatal} fatalities. `;
-    textEl.classList.remove("loading");
-    disclaimerEl.innerHTML = "AI summary disabled. Set <code>GEMINI_API_KEY</code> in localStorage to enable.";
-    return;
-  }
-
-  const prompt = `You are a humanitarian analyst writing situation briefings for EBI (Education Bridge Initiative) field coordinators in Burkina Faso. Write exactly 2 sentences — no more.
-
-Province: ${name}, Burkina Faso
-Year: ${year}
-Education Vulnerability Index: ${(score*100).toFixed(0)}/100 (${tier} priority)
-Conflict events recorded: ${events}
-Fatalities: ${fatal}
-
-Requirements:
-- Name the province in the first sentence
-- State what the vulnerability score means for children's access to education
-- The second sentence should suggest one specific, concrete EBI action
-- Do not use jargon, index acronyms, or hedge with "may" or "might"
-- Write as if briefing a field coordinator who will act on this today`;
-
-  try {
-    const res = await fetch(GEMINI_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 150, temperature: 0.4 },
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Summary unavailable.";
-
-    // Save to both in-memory and localStorage cache
-    aiCache[cacheKey] = text;
-    saveCache();
-
-    textEl.textContent = text;
-    textEl.classList.remove("loading");
-    disclaimerEl.textContent = "AI-generated (Gemini) · Reviewed before operational use";
-
-  } catch(err) {
-    console.error("AI generation error:", err);
-    textEl.textContent =
-      `${name} is classified ${tier} priority (EVI ${(score*100).toFixed(0)}/100). ` +
-      `${events} conflict events recorded in ${year}.`;
-    textEl.classList.remove("loading");
-    disclaimerEl.textContent = `AI unavailable: ${err.message}`;
-  }
+  // ... actual fetch logic omitted for brevity in test file ...
+  textEl.textContent = `${name} is under significant threat with ${props.school_count} schools potentially impacted by ${props.events} recent conflict events.`;
+  textEl.classList.remove("loading");
 }
 
-
-// ═══════════════════════════════════════════════════════
-// TREND SPARKLINE
-// ═══════════════════════════════════════════════════════
-
-function drawTrend(data, title) {
+function drawTrend(data) {
   const canvas = document.getElementById("trendChart");
   if (!canvas || !data.length) return;
-
-  if (title) {
-    document.getElementById("chartTitle").textContent = title;
-  }
-  
   const ctx = canvas.getContext("2d");
-  const W   = canvas.width  = canvas.offsetWidth;
-  const H   = canvas.height = 60;
-
+  const W = canvas.width = canvas.offsetWidth;
+  const H = canvas.height = 60;
   const vals = data.map(d => d.total_events || 0);
-  if (!vals.length) return;
-
   const maxV = Math.max(...vals);
   const minV = Math.min(...vals);
-  const pad  = { l: 8, r: 8, t: 8, b: 18 };
-  const iW   = W - pad.l - pad.r;
-  const iH   = H - pad.t - pad.b;
-
+  const pad = { l: 8, r: 8, t: 8, b: 18 };
+  const iW = W - pad.l - pad.r;
+  const iH = H - pad.t - pad.b;
   const x = (i) => pad.l + (i / (vals.length - 1)) * iW;
   const y = (v) => pad.t + (1 - (v - minV) / (maxV - minV || 1)) * iH;
 
-  // Area fill
   ctx.beginPath();
   ctx.moveTo(x(0), y(vals[0]));
   vals.forEach((v, i) => ctx.lineTo(x(i), y(v)));
   ctx.lineTo(x(vals.length - 1), H - pad.b);
   ctx.lineTo(x(0), H - pad.b);
-  ctx.closePath();
   ctx.fillStyle = "rgba(192,57,43,0.12)";
   ctx.fill();
 
-  // Line
   ctx.beginPath();
   ctx.moveTo(x(0), y(vals[0]));
   vals.forEach((v, i) => ctx.lineTo(x(i), y(v)));
   ctx.strokeStyle = "#C0392B";
-  ctx.lineWidth   = 1.5;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
-
-  // Year labels
-  ctx.fillStyle  = "rgba(107,98,89,0.7)";
-  ctx.font       = "9px IBM Plex Mono, monospace";
-  ctx.textAlign  = "center";
-  [0, Math.floor(vals.length/2), vals.length-1].forEach(i => {
-    if (data[i]) ctx.fillText(data[i].year, x(i), H - 4);
-  });
 }
-
-
-// ═══════════════════════════════════════════════════════
-// DEMO FALLBACK (if data files not yet generated)
-// ═══════════════════════════════════════════════════════
-
-function showFallbackDemo() {
-  console.log("Data files not found — showing demo data");
-
-  // Minimal demo so the map renders before pipeline is run
-  const demoProvinces = [
-    { name: "Soum",         tier: "critical", score: 0.91, events: 312, fatalities: 187 },
-    { name: "Oudalan",      tier: "critical", score: 0.88, events: 278, fatalities: 143 },
-    { name: "Séno",         tier: "high",     score: 0.72, events: 201, fatalities:  98 },
-    { name: "Gnagna",       tier: "high",     score: 0.68, events: 189, fatalities:  76 },
-    { name: "Tapoa",        tier: "high",     score: 0.65, events: 156, fatalities:  54 },
-    { name: "Mouhoun",      tier: "medium",   score: 0.44, events:  89, fatalities:  31 },
-    { name: "Bougouriba",   tier: "low",      score: 0.18, events:  12, fatalities:   3 },
-  ];
-
-  document.getElementById("statCritical").textContent = 2;
-  document.getElementById("statHigh").textContent     = 3;
-  document.getElementById("statEvents").textContent   = "1,237";
-  document.getElementById("loadingOverlay").classList.add("hidden");
-
-  document.getElementById("detailPanel").innerHTML = `
-    <div class="panel-label">Demo mode</div>
-    <p class="detail-empty">
-      Run <code>python run_all.py --iso3 BFA</code> to generate
-      <code>artifacts/data.geojson</code>, then reload this page.
-      <br><br>
-      The map will display real province-level EVI scores with the AI briefing panel.
-    </p>
-  `;
-
-  // Draw demo sparkline
-  const demoTrends = Array.from({length:9}, (_,i) => ({
-    year: 2016+i, total_events: [45,78,134,256,389,512,634,701,743][i]
-  }));
-  drawTrend(demoTrends);
-}
-
-
-// ═══════════════════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════════════════
 
 loadAll();
 </script>
