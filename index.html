@@ -481,9 +481,9 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       <div class="panel">
         <div class="panel-label">
           <span>Year</span>
-          <span class="year-display" id="yearDisplay">2024</span>
+          <span class="year-display" id="yearDisplay">2023</span>
         </div>
-        <input type="range" id="yearSlider" min="2016" max="2024" value="2024" step="1"/>
+        <input type="range" id="yearSlider" min="2015" max="2026" value="2023" step="1"/>
 
         <!-- Legend -->
         <div class="panel-label" style="margin-top:14px;margin-bottom:6px">Priority tier</div>
@@ -518,12 +518,10 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 // CONFIG
 // ═══════════════════════════════════════════════════════
 
-// ── GEMINI API KEY (free tier — no credit card required) ─────────────────────
-// Get a free key at: https://aistudio.google.com/apikey
-// Free limits: gemini-2.5-flash — 10 RPM, 250 req/day
-// BFA has 45 provinces — each cached permanently after first generation,
-// so you will use at most 45 API calls total across all time.
-const GEMINI_API_KEY = "YOUR_GEMINI_KEY_HERE";
+// ── GEMINI API KEY (Security: Loads from Browser LocalStorage) ──────────────
+// To set your key, open the browser console (F12) and run:
+// localStorage.setItem("GEMINI_API_KEY", "YOUR_KEY_HERE");
+const GEMINI_API_KEY = localStorage.getItem("GEMINI_API_KEY") || "KEY_NOT_SET";
 const GEMINI_MODEL   = "gemini-2.5-flash";
 const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -569,7 +567,7 @@ L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png
 
 let allFeatures  = {};   // year → GeoJSON features
 let trendsData   = [];
-let currentYear  = 2024;
+let currentYear  = 2023;
 let choropleth   = null;
 let selectedLayer = null;
 // Load persistent cache from localStorage on startup
@@ -608,7 +606,7 @@ async function loadAll() {
     const years = Object.keys(allFeatures).map(Number);
     if (years.length === 1) {
       const yr = years[0];
-      for (let y = 2016; y <= 2024; y++) {
+      for (let y = 2015; y <= 2026; y++) {
         if (!allFeatures[y]) allFeatures[y] = allFeatures[yr];
       }
     }

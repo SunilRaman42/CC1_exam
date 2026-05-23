@@ -22,28 +22,38 @@ DEFAULT_ISO3 = os.environ.get("PIPELINE_ISO3", "BFA")
 OUT_DIR      = Path("artifacts")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+# Naming alignment for Burkina Faso (CSV Name -> GeoJSON Name)
+BFA_NAME_MAP = {
+    "Kossi": "Kossin",
+    "Oubritenga": "Bassitenga",
+    "Sanmatenga": "Sandbondtenga",
+    "Soum": "Djelgodji",
+    "Tapoa": "Gobnangou",
+    "Seno": "Seno",
+    "Yagha": "Yagha"
+}
+
 def build_geojson(vuln: pd.DataFrame, boundaries: gpd.GeoDataFrame) -> dict:
     """
     Join vulnerability scores onto admin2 polygons for the choropleth.
     """
-    # Detect admin2 name column in boundaries (standard OCHA COD naming)
+    # Detect admin2 name column in boundaries
     name_col = next(
         (c for c in boundaries.columns
          if any(x in c.lower() for x in ["adm2_en", "adm2_name", "name_2", "shapename", "admin2name"])),
         boundaries.columns[0]
     )
-    boundaries = boundaries.rename(columns={name_col: "Admin2"})
-    boundaries["Admin2"] = boundaries["Admin2"].str.strip().str.title()
+    boundaries = boundaries.rename(columns={name_col: "Admin2_Geo"})
+    boundaries["Admin2_Geo"] = boundaries["Admin2_Geo"].str.strip().str.title()
     
-    # Standardize Admin2 in vuln data as well
-    vuln["Admin2"] = vuln["Admin2"].str.strip().str.title()
+    # Map CSV names to GeoJSON names
+    vuln["Admin2_Mapped"] = vuln["Admin2"].map(BFA_NAME_MAP).fillna(vuln["Admin2"])
+    vuln["Admin2_Mapped"] = vuln["Admin2_Mapped"].str.strip().str.title()
 
-    # Build GeoJSON manually so we control exactly what's in properties
+    # Build GeoJSON manually
     features = []
-    # We include ALL years in the GeoJSON now, index.html filters by year
     for _, row in vuln.iterrows():
-        # Find matching boundary
-        match = boundaries[boundaries["Admin2"] == row["Admin2"]]
+        match = boundaries[boundaries["Admin2_Geo"] == row["Admin2_Mapped"]]
         if match.empty:
             continue
             
@@ -55,7 +65,7 @@ def build_geojson(vuln: pd.DataFrame, boundaries: gpd.GeoDataFrame) -> dict:
             "type": "Feature",
             "geometry": mapping(geom),
             "properties": {
-                "admin2":        row["Admin2"],
+                "admin2":        row["Admin2"], # Keep original name for display
                 "region":        row["region"],
                 "year":          int(row["year"]),
                 "score":         round(float(row["score"]), 3),
@@ -131,6 +141,11 @@ if __name__ == "__main__":
     # ── GeoJSON ──────────────────────────────────────────────────────────────
     if in_admin2.exists():
         boundaries = gpd.read_file(in_admin2)
+        
+        # Simplify geometry to reduce file size (0.001 degrees is ~100m)
+        print("  Simplifying geometries...")
+        boundaries["geometry"] = boundaries["geometry"].simplify(0.005, preserve_topology=True)
+        
         geojson    = build_geojson(vuln, boundaries)
         geojson_path = OUT_DIR / "data.geojson"
         with open(geojson_path, "w") as f:
