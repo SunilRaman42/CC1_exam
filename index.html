@@ -814,19 +814,15 @@ function showProvinceDetail(props) {
         <div class="metric-val">${events.toLocaleString()}</div>
         <div class="metric-label">Events (Year)</div>
       </div>
-      <div class="metric">
-        <div class="metric-val">${fatal.toLocaleString()}</div>
-        <div class="metric-label">Fatalities (Year)</div>
-      </div>
     </div>
     <div class="detail-metrics" style="margin-top: -8px;">
-      <div class="metric" style="background: rgba(139,26,26,0.05); grid-column: span 1.5;">
+      <div class="metric" style="background: rgba(139,26,26,0.05);">
         <div class="metric-val" style="color: var(--tier-critical);">${(props.events_2yr || 0).toLocaleString()}</div>
-        <div class="metric-label">Events (2yr Persistence)</div>
+        <div class="metric-label">2yr Events</div>
       </div>
-      <div class="metric" style="background: rgba(139,26,26,0.05); grid-column: span 1.5;">
+      <div class="metric" style="background: rgba(139,26,26,0.05);">
         <div class="metric-val" style="color: var(--tier-critical);">${(props.fatalities_2yr || 0).toLocaleString()}</div>
-        <div class="metric-label">Fatalities (2yr Persistence)</div>
+        <div class="metric-label">2yr Fatalities</div>
       </div>
     </div>
 
@@ -837,12 +833,12 @@ function showProvinceDetail(props) {
         <span>${(score * 100).toFixed(0)}/100</span>
       </div>
       <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.round(score*100)}%;background:${TIER_COLORS[tier]}"></div></div>
-      <p style="font-size: 9px; color: var(--ink-muted); margin-top: 4px;">EVI (Education Vulnerability Index) measures the risk of school closure due to conflict, where higher scores indicate greater threat.</p>
+      <p style="font-size: 9px; color: var(--ink-muted); margin-top: 4px;">EVI combines national educational baseline indicators with localized security threats.</p>
     </div>` : ""}
 
     <div class="ai-box" id="aiBox">
       <div class="ai-label">AI Situation Briefing</div>
-      <div class="ai-text loading" id="aiText">Generating summary…</div>
+      <div class="ai-text loading" id="aiText">Generating rationale…</div>
       <div class="ai-disclaimer" id="aiDisclaimer"></div>
     </div>
   `;
@@ -872,16 +868,15 @@ function showProvinceDetail(props) {
 
 async function generateSituationBriefing(props) {
   const name    = props.admin2 || "this province";
-  const tier    = (props.priority || "unknown").toLowerCase().replace("_priority","");
-  const score   = props.score ?? "unknown";
-  const events  = props.events ?? "unknown";
+  const score   = (props.score * 100).toFixed(0);
+  const events2yr = props.events_2yr || 0;
+  const fatal2yr = props.fatalities_2yr || 0;
   const year    = props.year || currentYear;
   const cacheKey = `${name}-${year}`;
 
   const textEl       = document.getElementById("aiText");
   const disclaimerEl = document.getElementById("aiDisclaimer");
-  if (!textEl) return;
-
+  
   if (aiCache[cacheKey]) {
     textEl.textContent = aiCache[cacheKey];
     textEl.classList.remove("loading");
@@ -889,17 +884,9 @@ async function generateSituationBriefing(props) {
     return;
   }
 
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_KEY_HERE" || GEMINI_API_KEY === "KEY_NOT_SET") {
-    textEl.textContent = `${name} is classified ${tier} priority (EVI ${(score*100).toFixed(0)}/100) with ${events} conflict events recorded in ${year}.`;
-    textEl.classList.remove("loading");
-    disclaimerEl.innerHTML = "AI summary disabled. Set <code>GEMINI_API_KEY</code> in localStorage.";
-    return;
-  }
-
-  const prompt = `You are a humanitarian analyst. Write exactly 2 sentences.
-Province: ${name}, Burkina Faso. Year: ${year}. EVI: ${(score*100).toFixed(0)}/100 (${tier} priority). Events: ${events}.
-1st sentence: State what the vulnerability score means for education. 
-2nd sentence: Suggest one concrete action.`;
+  const prompt = `You are a humanitarian analyst. Explain why the EVI score for ${name} is ${score}/100.
+  The province has recorded ${events2yr} conflict events and ${fatal2yr} fatalities over the past two years.
+  Write exactly 2 sentences: 1st, explain that the EVI score reflects a blend of systemic education challenges and the localized security threat described by the conflict metrics. 2nd, provide one actionable recommendation for enhancing school safety in this specific province.`;
 
   try {
     const res = await fetch(GEMINI_URL, {
@@ -924,9 +911,9 @@ Province: ${name}, Burkina Faso. Year: ${year}. EVI: ${(score*100).toFixed(0)}/1
     disclaimerEl.textContent = "AI-generated (Gemini)";
 
   } catch(err) {
-    textEl.textContent = `${name} is classified ${tier} priority. ${events} conflict events recorded.`;
+    textEl.textContent = `Vulnerability score of ${score}/100 is driven by a combination of national education metrics and the ${events2yr} conflict events recorded in the last two years.`;
     textEl.classList.remove("loading");
-    disclaimerEl.textContent = `AI unavailable: ${err.message}`;
+    disclaimerEl.textContent = `AI explanation unavailable: ${err.message}`;
   }
 }
 
