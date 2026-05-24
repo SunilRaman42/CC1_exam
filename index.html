@@ -912,9 +912,13 @@ async function generateSituationBriefing(props) {
   }
 
   if (!sessionKey || sessionKey === "" || sessionKey.length < 10) {
-    textEl.textContent = `${name} is classified ${tier} priority. EVI score: ${score}/100. [Enter session key in sidebar to enable AI briefing]`;
+    // Professional fallback for guests without a key
+    const oos = props.oos_raw ? props.oos_raw.toLocaleString() : "systemic";
+    const rationale = `The ${tier} priority classification is driven by ${oos} children out of school and ${events2yr} conflict events recorded in the last two years. [Enter AI key in sidebar for detailed analysis]`;
+    
+    textEl.textContent = rationale;
     textEl.classList.remove("loading");
-    disclaimerEl.innerHTML = "Secure Session Key missing.";
+    disclaimerEl.innerHTML = "System Rationale (No AI Key provided)";
     return;
   }
 
