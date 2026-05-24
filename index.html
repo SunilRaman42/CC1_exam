@@ -902,7 +902,7 @@ async function generateSituationBriefing(props) {
   const disclaimerEl = document.getElementById("aiDisclaimer");
   
   // Try to get key from session input
-  const sessionKey = document.getElementById("sessionKey")?.value || "";
+  const sessionKey = (document.getElementById("sessionKey")?.value || "").trim();
 
   if (aiCache[cacheKey]) {
     textEl.textContent = aiCache[cacheKey];
@@ -922,7 +922,8 @@ async function generateSituationBriefing(props) {
     return;
   }
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${sessionKey}`;
+  // Using v1 endpoint for maximum stability
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${sessionKey}`;
 
   const prompt = `You are a humanitarian analyst providing a rationale for the Education Vulnerability Index (EVI).
 Province: ${name}, Burkina Faso. Year: ${year}. 
@@ -946,7 +947,11 @@ If 2-year persistence or a recent spike is high, mention it as a driver. Use the
       }),
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      if (res.status === 404) throw new Error(`Model not found or API endpoint invalid (HTTP 404). Check if ${GEMINI_MODEL} is enabled for your key.`);
+      if (res.status === 403) throw new Error("Invalid API Key or permission denied (HTTP 403).");
+      throw new Error(`HTTP ${res.status}`);
+    }
 
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Summary unavailable.";
