@@ -245,8 +245,8 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 
 .detail-metrics {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
   margin-bottom: 16px;
 }
 
@@ -380,7 +380,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 
 #trendChart {
   width: 100%;
-  height: 60px;
+  height: 80px;
 }
 
 /* ── Loading overlay ─────────────────────────────────── */
@@ -463,7 +463,11 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       </div>
       <div class="stat">
         <div class="stat-num" id="statEvents">—</div>
-        <div class="stat-label">Conflict events</div>
+        <div class="stat-label">Events</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="statFatalities">—</div>
+        <div class="stat-label">Fatalities</div>
       </div>
     </div>
   </header>
@@ -648,7 +652,12 @@ function renderSchools() {
       });
     },
     onEachFeature: (feature, layer) => {
-      layer.bindPopup(`<strong>${feature.properties.name || "Unnamed School"}</strong><br>${feature.properties.amenity || "School"}`);
+      const coords = feature.geometry.coordinates;
+      const lat = coords[1].toFixed(4);
+      const lng = coords[0].toFixed(4);
+      const name = feature.properties.name || `School (${lat}, ${lng})`;
+      layer.bindTooltip(name);
+      layer.bindPopup(`<strong>${name}</strong><br>${feature.properties.amenity || "School"}`);
     }
   }).addTo(map);
 }
@@ -714,11 +723,13 @@ function populateStats(insights) {
   document.getElementById("statCritical").textContent = insights.critical_regions || 0;
   document.getElementById("statSchoolsAtRisk").textContent = (insights.schools_at_risk || 0).toLocaleString();
   document.getElementById("statEvents").textContent = (insights.total_events || 0).toLocaleString();
+  document.getElementById("statFatalities").textContent = (insights.total_fatalities || 0).toLocaleString();
 }
 
 function updateHeaderStats(features) {
   const critical = features.filter(f => ["critical"].includes((f.properties.priority || "").toLowerCase())).length;
   const events = features.reduce((s, f) => s + (f.properties.events || 0), 0);
+  const fatalities = features.reduce((s, f) => s + (f.properties.fatalities || 0), 0);
   const schoolsAtRisk = features
     .filter(f => ["critical"].includes((f.properties.priority || "").toLowerCase()))
     .reduce((s, f) => s + (f.properties.school_count || 0), 0);
@@ -726,6 +737,7 @@ function updateHeaderStats(features) {
   document.getElementById("statCritical").textContent = critical;
   document.getElementById("statSchoolsAtRisk").textContent = schoolsAtRisk.toLocaleString();
   document.getElementById("statEvents").textContent = events.toLocaleString();
+  document.getElementById("statFatalities").textContent = fatalities.toLocaleString();
 }
 
 function resetDetailPanel() {
@@ -755,11 +767,15 @@ function showProvinceDetail(props) {
     <div class="detail-metrics">
       <div class="metric">
         <div class="metric-val">${schools.toLocaleString()}</div>
-        <div class="metric-label">Total Schools</div>
+        <div class="metric-label">Schools</div>
       </div>
       <div class="metric">
         <div class="metric-val">${events.toLocaleString()}</div>
-        <div class="metric-label">Conflict Events</div>
+        <div class="metric-label">Events</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">${fatal.toLocaleString()}</div>
+        <div class="metric-label">Fatalities</div>
       </div>
     </div>
 
@@ -873,19 +889,37 @@ function drawTrend(data, title) {
   
   const ctx = canvas.getContext("2d");
   const W   = canvas.width  = canvas.offsetWidth;
-  const H   = canvas.height = 60;
+  const H   = canvas.height = 80; // Increased height slightly for better visibility
 
   const vals = data.map(d => d.total_events || 0);
   if (!vals.length) return;
 
-  const maxV = Math.max(...vals);
-  const minV = Math.min(...vals);
-  const pad  = { l: 8, r: 8, t: 8, b: 18 };
+  const maxV = Math.max(...vals, 1);
+  const pad  = { l: 35, r: 10, t: 10, b: 20 };
   const iW   = W - pad.l - pad.r;
   const iH   = H - pad.t - pad.b;
 
   const x = (i) => pad.l + (i / (data.length - 1)) * iW;
-  const y = (v) => pad.t + (1 - (v - minV) / (maxV - minV || 1)) * iH;
+  const y = (v) => pad.t + (1 - (v / maxV)) * iH;
+
+  // Grid lines & Y-axis labels
+  ctx.strokeStyle = "rgba(26,20,16,0.06)";
+  ctx.setLineDash([2, 2]);
+  ctx.font = "9px IBM Plex Mono, monospace";
+  ctx.fillStyle = "rgba(107,98,89,0.7)";
+  ctx.textAlign = "right";
+
+  [0, 0.5, 1].forEach(pct => {
+    const valY = pad.t + pct * iH;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, valY);
+    ctx.lineTo(W - pad.r, valY);
+    ctx.stroke();
+
+    const val = Math.round(maxV * (1 - pct));
+    ctx.fillText(val.toLocaleString(), pad.l - 6, valY + 3);
+  });
+  ctx.setLineDash([]);
 
   // Area fill
   ctx.beginPath();
