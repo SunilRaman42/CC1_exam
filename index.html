@@ -824,13 +824,19 @@ function showProvinceDetail(props) {
   const name    = props.admin2 || "Unknown";
   const tierLabel = tier.replace("_priority","").replace("_","-");
 
+  // Calculate total schools for the selected year to get percentage
+  const currentYearFeatures = allFeatures[currentYear] || [];
+  const totalSchools = currentYearFeatures.reduce((sum, f) => sum + (f.properties.school_count || 0), 0);
+  const schoolPercentage = totalSchools > 0 ? (schools / totalSchools) * 100 : 0;
+  const tierColor = TIER_COLORS[tier] || TIER_COLORS.unknown;
+
   document.getElementById("detailPanel").innerHTML = `
     <div class="panel-label">Province detail</div>
     <div class="detail-name">${name}</div>
     <span class="detail-tier tier-${tier.replace("_priority","")}">${tierLabel} priority</span>
 
     <div class="detail-metrics">
-      <div class="metric">
+      <div class="metric" style="background: linear-gradient(90deg, ${tierColor}40 ${schoolPercentage}%, var(--surface2) ${schoolPercentage}%);">
         <div class="metric-val">${schools.toLocaleString()}</div>
         <div class="metric-label">Schools</div>
       </div>
