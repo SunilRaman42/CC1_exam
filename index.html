@@ -515,19 +515,15 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       <p class="subhead">
         EVI measures the threat of conflict to school access. Click any province for its profile and AI briefing.
       </p>
-      <a href="./schools/index.html" class="cta-button">
-        Analyze Infrastructure Risk
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </div>
+      <div class="stats">
+      <a href="./schools/index.html" class="stat" style="text-decoration:none; cursor:pointer;">
+        <div class="stat-num" id="statSchoolsAtRisk">—</div>
+        <div class="stat-label" style="text-decoration:underline;">Schools at risk</div>
       </a>
-    </div>
-    <div class="stats">
       <div class="stat">
         <div class="stat-num" id="statCritical">—</div>
         <div class="stat-label">Critical provinces</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="statSchoolsAtRisk">—</div>
-        <div class="stat-label">Schools at risk</div>
       </div>
       <div class="stat">
         <div class="stat-num" id="statEvents">—</div>
@@ -537,8 +533,8 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
         <div class="stat-num" id="statFatalities">—</div>
         <div class="stat-label">Fatalities</div>
       </div>
-    </div>
-  </header>
+      </div>
+      </header>
 
   <!-- Body -->
   <div class="body">
