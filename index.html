@@ -153,6 +153,33 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   align-items: center;
 }
 
+/* API Key Input Styling */
+.key-input-wrap {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(139,26,26,0.05);
+  border-radius: 6px;
+  border: 1px dashed var(--accent);
+}
+.key-input-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+.key-input-field {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
 .year-display {
   font-family: var(--serif);
   font-size: 22px;
@@ -524,6 +551,10 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 
       <!-- Year slider -->
       <div class="panel">
+        <div class="key-input-wrap">
+          <label class="key-input-label">Session AI Key (Never Saved)</label>
+          <input type="password" id="sessionKey" class="key-input-field" placeholder="Paste Gemini Key here..." />
+        </div>
         <div class="panel-label">
           <span>Year</span>
           <span class="year-display" id="yearDisplay">2023</span>
@@ -573,9 +604,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 // CONFIG
 // ═══════════════════════════════════════════════════════
 
-const GEMINI_API_KEY = localStorage.getItem("GEMINI_API_KEY") || "KEY_NOT_SET";
 const GEMINI_MODEL   = "gemini-1.5-flash";
-const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 const LS_CACHE_KEY   = "evi_briefings_bfa";
 
 const GEOJSON_URL  = "./artifacts/data.geojson";
@@ -872,6 +901,9 @@ async function generateSituationBriefing(props) {
   const textEl       = document.getElementById("aiText");
   const disclaimerEl = document.getElementById("aiDisclaimer");
   
+  // Try to get key from session input
+  const sessionKey = document.getElementById("sessionKey")?.value || "";
+
   if (aiCache[cacheKey]) {
     textEl.textContent = aiCache[cacheKey];
     textEl.classList.remove("loading");
@@ -879,12 +911,14 @@ async function generateSituationBriefing(props) {
     return;
   }
 
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_KEY_HERE" || GEMINI_API_KEY === "KEY_NOT_SET") {
-    textEl.textContent = `${name} is classified ${tier} priority (EVI ${score}/100).`;
+  if (!sessionKey || sessionKey === "" || sessionKey.length < 10) {
+    textEl.textContent = `${name} is classified ${tier} priority. EVI score: ${score}/100. [Enter session key in sidebar to enable AI briefing]`;
     textEl.classList.remove("loading");
-    disclaimerEl.innerHTML = "AI summary disabled. Set <code>GEMINI_API_KEY</code> in localStorage.";
+    disclaimerEl.innerHTML = "Secure Session Key missing.";
     return;
   }
+
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${sessionKey}`;
 
   const prompt = `You are a humanitarian analyst providing a rationale for the Education Vulnerability Index (EVI).
 Province: ${name}, Burkina Faso. Year: ${year}. 
@@ -899,7 +933,7 @@ Write exactly 2 sentences explaining why this province is classified as ${tier} 
 If 2-year persistence or a recent spike is high, mention it as a driver. Use the specific numerical values provided.`;
 
   try {
-    const res = await fetch(GEMINI_URL, {
+    const res = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
