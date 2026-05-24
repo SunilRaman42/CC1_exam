@@ -5,6 +5,7 @@ Joins hybrid vulnerability scores onto admin2 boundaries and exports:
   - artifacts/data.geojson   → choropleth map layer (Leaflet-ready)
   - artifacts/trends.json    → time-series data for the chart panel
   - artifacts/insights.json  → headline stats and key findings
+  - artifacts/schools.geojson → school point locations
 
 Supports dynamic ISO3 input. Defaults to Admin2 resolution.
 """
@@ -44,7 +45,9 @@ def build_geojson(vuln: pd.DataFrame, boundaries: gpd.GeoDataFrame) -> dict:
          if any(x in c.lower() for x in ["adm2_en", "adm2_name", "name_2", "shapename", "admin2name"])),
         boundaries.columns[0]
     )
-    boundaries = boundaries.rename(columns={name_col: "Admin2_Geo"})
+    if "Admin2_Geo" not in boundaries.columns:
+        boundaries = boundaries.rename(columns={name_col: "Admin2_Geo"})
+    
     boundaries["Admin2_Geo"] = boundaries["Admin2_Geo"].str.strip().str.title()
     
     # Map CSV names to GeoJSON names
@@ -62,21 +65,28 @@ def build_geojson(vuln: pd.DataFrame, boundaries: gpd.GeoDataFrame) -> dict:
         if geom is None:
             continue
 
+        properties = {
+            "admin2":        row["Admin2"], # Keep original name for display
+            "admin1":        row["Admin1"],
+            "year":          int(row["year"]),
+            "score":         round(float(row["score"]), 3),
+            "priority":      str(row["priority"]),
+            "events":        int(row["events"]) if pd.notna(row["events"]) else 0,
+            "fatalities":    int(row["fatalities"]) if pd.notna(row["fatalities"]) else 0,
+            "events_2yr":    int(row["events_2yr"]) if "events_2yr" in row and pd.notna(row["events_2yr"]) else 0,
+            "fatalities_2yr": int(row["fatalities_2yr"]) if "fatalities_2yr" in row and pd.notna(row["fatalities_2yr"]) else 0,
+            "edu_baseline":  round(float(row["edu_baseline"]), 3),
+            "conflict_score": round(float(row["conflict_score"]), 3),
+            "score_basis":   str(row["score_basis"])
+        }
+        
+        if "school_count" in row:
+            properties["school_count"] = int(row["school_count"])
+
         features.append({
             "type": "Feature",
             "geometry": mapping(geom),
-            "properties": {
-                "admin2":        row["Admin2"], # Keep original name for display
-                "region":        row["region"],
-                "year":          int(row["year"]),
-                "score":         round(float(row["score"]), 3),
-                "priority":      str(row["score_tercile"]),
-                "events":        int(row["events"]) if pd.notna(row["events"]) else 0,
-                "fatalities":    int(row["fatalities"]) if pd.notna(row["fatalities"]) else 0,
-                "edu_baseline":  round(float(row["edu_baseline"]), 3),
-                "conflict_score": round(float(row["conflict_score"]), 3),
-                "score_basis":   str(row["score_basis"])
-            }
+            "properties": properties
         })
 
     return {"type": "FeatureCollection", "features": features}
@@ -95,14 +105,19 @@ def build_insights(vuln: pd.DataFrame, trends: pd.DataFrame, iso3: str) -> dict:
     """
     latest_year  = vuln["year"].max()
     vuln_latest  = vuln[vuln["year"] == latest_year]
-    # In our 4-tier system, high risk is critical + high_priority
-    critical     = vuln_latest[vuln_latest["score_tercile"] == "critical"]
-    high_priority = vuln_latest[vuln_latest["score_tercile"] == "high_priority"]
+    # In our 4-tier system: critical, high_priority, medium_priority, lower_priority
+    critical     = vuln_latest[vuln_latest["priority"] == "critical"]
+    high_priority = vuln_latest[vuln_latest["priority"] == "high_priority"]
 
     # Conflict trend: compare last 3 years to prior 3 years
     recent    = trends[trends["year"] >= latest_year - 2]["total_events"].mean()
     prior     = trends[trends["year"].between(latest_year - 5, latest_year - 3)]["total_events"].mean()
     trend_pct = round((recent - prior) / prior * 100, 1) if prior and prior > 0 else 0
+
+    # Schools at risk (Sum of school counts in critical provinces)
+    schools_at_risk = 0
+    if "school_count" in vuln_latest.columns:
+        schools_at_risk = int(critical["school_count"].sum())
 
     return {
         "country":           iso3,
@@ -114,6 +129,7 @@ def build_insights(vuln: pd.DataFrame, trends: pd.DataFrame, iso3: str) -> dict:
         "top_3_critical":    critical.nlargest(3, "score")["Admin2"].tolist(),
         "total_events":      int(trends[trends["year"] == latest_year]["total_events"].sum()),
         "total_fatalities":  int(trends[trends["year"] == latest_year]["total_fatalities"].sum()),
+        "schools_at_risk":   schools_at_risk
     }
 
 
@@ -128,6 +144,7 @@ if __name__ == "__main__":
     in_vuln   = OUT_DIR / f"{iso3}_hybrid_vulnerability_index.csv"
     in_trends = OUT_DIR / f"{iso3}_national_trends.csv"
     in_admin2 = Path(f"data/raw/boundaries/{iso3}_admin2.geojson")
+    in_schools = Path(f"data/clean/schools/schools_{iso3}.csv")
 
     if not in_vuln.exists():
         print(f"✗ Vulnerability file missing: {in_vuln}")
@@ -139,14 +156,63 @@ if __name__ == "__main__":
     vuln   = pd.read_csv(in_vuln)
     trends = pd.read_csv(in_trends)
 
+    school_counts = None
+    if in_schools.exists() and in_admin2.exists():
+        print(f"  → Processing school locations for {iso3}...")
+        boundaries = gpd.read_file(in_admin2)
+        # Detect admin2 name column
+        name_col = next(
+            (c for c in boundaries.columns
+             if any(x in c.lower() for x in ["adm2_en", "adm2_name", "name_2", "shapename", "admin2name"])),
+            boundaries.columns[0]
+        )
+        
+        schools_df = pd.read_csv(in_schools)
+        schools_gdf = gpd.GeoDataFrame(
+            schools_df, 
+            geometry=gpd.points_from_xy(schools_df.longitude, schools_df.latitude),
+            crs="EPSG:4326"
+        )
+        
+        # Ensure CRS match
+        if boundaries.crs != schools_gdf.crs:
+            boundaries = boundaries.to_crs(schools_gdf.crs)
+            
+        # Spatial join to count schools per admin2
+        print(f"  → Performing spatial join (schools ∩ boundaries)...")
+        joined = gpd.sjoin(schools_gdf, boundaries[[name_col, "geometry"]], how="inner", predicate="within")
+        school_counts = joined.groupby(name_col).size().reset_index(name="school_count")
+        school_counts = school_counts.rename(columns={name_col: "Admin2_Geo"})
+        school_counts["Admin2_Geo"] = school_counts["Admin2_Geo"].str.strip().str.title()
+        
+        # Merge school counts into vuln early
+        vuln["Admin2_Mapped"] = vuln["Admin2"].map(BFA_NAME_MAP).fillna(vuln["Admin2"])
+        vuln["Admin2_Mapped"] = vuln["Admin2_Mapped"].str.strip().str.title()
+        vuln = vuln.merge(school_counts, left_on="Admin2_Mapped", right_on="Admin2_Geo", how="left")
+        vuln["school_count"] = vuln["school_count"].fillna(0).astype(int)
+
+        # Export schools.geojson (all points, minimal properties for performance)
+        schools_out_path = OUT_DIR / "schools.geojson"
+        print(f"  → Saving schools point data...")
+        schools_gdf[["name", "amenity", "geometry"]].to_file(schools_out_path, driver="GeoJSON")
+        print(f"  ✓ Schools GeoJSON → {schools_out_path}")
+
     # ── GeoJSON ──────────────────────────────────────────────────────────────
     if in_admin2.exists():
         boundaries = gpd.read_file(in_admin2)
         
-        # Simplify geometry to reduce file size (0.001 degrees is ~100m)
-        print("  Simplifying geometries...")
+        # Simplify geometry to reduce file size (0.005 degrees is ~500m)
+        print("  → Simplifying boundary geometries...")
         boundaries["geometry"] = boundaries["geometry"].simplify(0.005, preserve_topology=True)
         
+        # Renaming for consistency with build_geojson
+        name_col = next(
+            (c for c in boundaries.columns
+             if any(x in c.lower() for x in ["adm2_en", "adm2_name", "name_2", "shapename", "admin2name"])),
+            boundaries.columns[0]
+        )
+        boundaries = boundaries.rename(columns={name_col: "Admin2_Geo"})
+
         geojson    = build_geojson(vuln, boundaries)
         geojson_path = OUT_DIR / "data.geojson"
         with open(geojson_path, "w") as f:

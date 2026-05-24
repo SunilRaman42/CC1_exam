@@ -428,6 +428,41 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 /* ── Leaflet overrides ───────────────────────────────── */
 .leaflet-container { background: #D8D0C0 !important; }
 .leaflet-control-attribution { font-size: 9px !important; }
+
+/* ── CTA Button ─────────────────────────────────────── */
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.cta-button:hover {
+  background: #A93226;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(192,57,43,0.3);
+}
+
+.cta-button svg {
+  transition: transform 0.2s ease;
+}
+
+.cta-button:hover svg {
+  transform: translateX(3px);
+}
 </style>
 </head>
 
@@ -443,7 +478,9 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   <!-- Header -->
   <header class="header">
     <div class="header-left">
-      <div class="kicker">Burkina Faso · Schools Overlay Test · 2015–2026</div>
+      <div class="kicker">
+        Burkina Faso · Schools Overlay Test · 2015–2026
+      </div>
       <h1 class="headline">
         Conflict is closing schools faster than<br>
         <em>they can be rebuilt</em>
@@ -451,6 +488,10 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       <p class="subhead">
         EVI measures the threat of conflict to school access. Click any province for its profile and AI briefing.
       </p>
+      <a href="./schools/index.html" class="cta-button">
+        Analyze Infrastructure Risk
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
     </div>
     <div class="stats">
       <div class="stat">
@@ -771,11 +812,21 @@ function showProvinceDetail(props) {
       </div>
       <div class="metric">
         <div class="metric-val">${events.toLocaleString()}</div>
-        <div class="metric-label">Events</div>
+        <div class="metric-label">Events (Year)</div>
       </div>
       <div class="metric">
         <div class="metric-val">${fatal.toLocaleString()}</div>
-        <div class="metric-label">Fatalities</div>
+        <div class="metric-label">Fatalities (Year)</div>
+      </div>
+    </div>
+    <div class="detail-metrics" style="margin-top: -8px;">
+      <div class="metric" style="background: rgba(139,26,26,0.05); grid-column: span 1.5;">
+        <div class="metric-val" style="color: var(--tier-critical);">${(props.events_2yr || 0).toLocaleString()}</div>
+        <div class="metric-label">Events (2yr Persistence)</div>
+      </div>
+      <div class="metric" style="background: rgba(139,26,26,0.05); grid-column: span 1.5;">
+        <div class="metric-val" style="color: var(--tier-critical);">${(props.fatalities_2yr || 0).toLocaleString()}</div>
+        <div class="metric-label">Fatalities (2yr Persistence)</div>
       </div>
     </div>
 
