@@ -12,9 +12,7 @@
 <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 
 <style>
-/* ── Reset ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --bg:          #F5F0E8;
   --ink:         #1A1410;
@@ -32,7 +30,6 @@
   --serif:   'Libre Baskerville', Georgia, serif;
   --sans:    'IBM Plex Sans', sans-serif;
 }
-
 html, body { height: 100%; background: var(--bg); color: var(--ink); font-family: var(--sans); }
 .shell { display: grid; grid-template-rows: auto 1fr; height: 100vh; overflow: hidden; }
 .header { background: var(--ink); color: var(--bg); padding: 18px 28px 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; border-bottom: 3px solid var(--accent); }
@@ -161,7 +158,7 @@ function renderSchools(geo) {
   if (schoolsLayer) map.removeLayer(schoolsLayer);
   schoolsLayer = L.geoJSON(geo, {
     pointToLayer: (f, latlng) => {
-      const s = scoreData.find(x => Math.abs(x.lat - latlng.lat) < 0.0001 && Math.abs(x.lon - latlng.lon) < 0.0001);
+      const s = scoreData.find(x => Math.abs(x.lat - latlng.lat) < 0.0001 && Math.abs(x.lon - latlng.lng) < 0.0001);
       const isAtRisk = s && (s.at_risk_years || []).includes(currentYear);
       let color = isAtRisk ? (s.v_score > 0.8 ? TIER_COLORS.critical : s.v_score > 0.5 ? TIER_COLORS.high : TIER_COLORS.medium) : "#ccc";
       return L.circleMarker(latlng, { radius: isAtRisk ? 4 : 2, fillColor: color, color: "#fff", weight: 0.5, opacity: isAtRisk ? 0.9 : 0.4, fillOpacity: isAtRisk ? 1.0 : 0.3 });
