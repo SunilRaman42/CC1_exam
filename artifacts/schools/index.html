@@ -450,15 +450,15 @@ function showSchoolDetail(props, latlng) {
   if (!score) return;
   document.getElementById("detailPanel").innerHTML = \`
     <div class="panel-label">School detail</div>
-    <div class="detail-name">\${props.name || "Unnamed"}</div>
-    <div class="panel-label" style="margin-top:4px;">\${score.province || "Unknown"} Province</div>
+    <div class="detail-name">${props.name || "Unnamed"}</div>
+    <div class="panel-label" style="margin-top:4px;">${score.province || "Unknown"} Province</div>
     <div class="detail-metrics">
-      <div class="metric"><div class="metric-val">\${(score.v_score * 100).toFixed(0)}%</div><div class="metric-label">Risk Score</div></div>
-      <div class="metric"><div class="metric-val">\${score.trauma}</div><div class="metric-label">Events Near</div></div>
+      <div class="metric"><div class="metric-val">${(score.v_score * 100).toFixed(0)}%</div><div class="metric-label">Risk Score</div></div>
+      <div class="metric"><div class="metric-val">${score.trauma}</div><div class="metric-label">Events Near</div></div>
     </div>
     <div class="ai-box">
       <div class="ai-label">Risk Profile</div>
-      <div class="ai-text">This facility is in <strong>\${score.province}</strong>. It has been exposed to conflict-related events within its 10km radius in: <strong>\${(score.at_risk_years || []).join(", ") || "none"}</strong>.</div>
+      <div class="ai-text">This facility is in <strong>${score.province}</strong>. It has been exposed to conflict-related events within its 10km radius in: <strong>${(score.at_risk_years || []).join(", ") || "none"}</strong>.</div>
     </div>\`;
 }
 
