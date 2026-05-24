@@ -515,16 +515,47 @@ async function init() {
     });
 
     document.getElementById("loadingOverlay").classList.add("hidden");
+
+    // Add Year Slider Listener
+    const slider = document.getElementById("yearSlider");
+    const display = document.getElementById("yearDisplay");
+    
+    slider.addEventListener("input", (e) => {
+      currentYear = parseInt(e.target.value);
+      display.textContent = currentYear;
+      
+      // Update background boundaries
+      if (choroplethLayer) {
+        choroplethLayer.clearLayers();
+        choroplethLayer.addData(geoRes.features.filter(f => f.properties.year === currentYear));
+      }
+      
+      // Update schools and heatmap
+      renderSchools(schoolsRes);
+      renderHeatmap();
+      
+      // Update stats
+      updateGlobalStats();
+    });
+
   } catch (e) {
     console.error("Load failed", e);
   }
 }
 
+function updateGlobalStats() {
+  // Filter scores for current year
+  const activeScores = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear));
+  document.getElementById("statSchoolsTotal").textContent = scoreData.length.toLocaleString();
+  document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
+}
+
 function renderHeatmap() {
   if (heatmapLayer) map.removeLayer(heatmapLayer);
   
+  // Filter for schools at risk in the current year
   const heatPoints = scoreData
-    .filter(s => s.v_score > 0.1) // Only show points with some risk
+    .filter(s => (s.at_risk_years || []).includes(currentYear) && s.v_score > 0.1)
     .map(s => [s.lat, s.lon, s.v_score]);
   
   heatmapLayer = L.heatLayer(heatPoints, {
@@ -550,26 +581,32 @@ function renderSchools(geo) {
   schoolsLayer = L.geoJSON(geo, {
     pointToLayer: (f, latlng) => {
       // Find score for this school
-      // This is expensive O(N) for each point, ideally we map by ID or name
-      const score = scoreData.find(s => 
+      const schoolScore = scoreData.find(s => 
           Math.abs(s.lat - latlng.lat) < 0.0001 && 
           Math.abs(s.lon - latlng.lng) < 0.0001
       );
 
       let color = TIER_COLORS.low;
-      if (score) {
-        if (score.v_score > 0.8) color = TIER_COLORS.critical;
-        else if (score.v_score > 0.5) color = TIER_COLORS.high;
-        else if (score.v_score > 0.2) color = TIER_COLORS.medium;
+      let isAtRisk = false;
+      
+      if (schoolScore) {
+        isAtRisk = (schoolScore.at_risk_years || []).includes(currentYear);
+        if (isAtRisk) {
+          if (schoolScore.v_score > 0.8) color = TIER_COLORS.critical;
+          else if (schoolScore.v_score > 0.5) color = TIER_COLORS.high;
+          else if (schoolScore.v_score > 0.2) color = TIER_COLORS.medium;
+        } else {
+          color = "#ccc"; // Not at risk this year
+        }
       }
 
       return L.circleMarker(latlng, {
-        radius: 3,
+        radius: isAtRisk ? 4 : 2,
         fillColor: color,
         color: "#fff",
         weight: 0.5,
-        opacity: 0.8,
-        fillOpacity: 0.9
+        opacity: isAtRisk ? 0.9 : 0.4,
+        fillOpacity: isAtRisk ? 1.0 : 0.3
       });
     },
     onEachFeature: (f, layer) => {
