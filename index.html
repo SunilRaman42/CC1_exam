@@ -517,7 +517,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       </p>
       </div>
       <div class="stats" style="justify-content: center; gap: 40px;">
-        <a href="./schools/index.html" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
+        <a href="artifacts/schools/index.html" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
           <div class="stat-num" id="statSchoolsAtRisk">—</div>
           <div class="stat-label" style="text-decoration:underline;">Schools at risk</div>
         </a>
@@ -824,10 +824,9 @@ function showProvinceDetail(props) {
   const name    = props.admin2 || "Unknown";
   const tierLabel = tier.replace("_priority","").replace("_","-");
 
-  // Calculate total schools for the selected year to get percentage
-  const currentYearFeatures = allFeatures[currentYear] || [];
-  const totalSchools = currentYearFeatures.reduce((sum, f) => sum + (f.properties.school_count || 0), 0);
-  const schoolPercentage = totalSchools > 0 ? (schools / totalSchools) * 100 : 0;
+  // Calculate percentage of schools at risk in this province
+  const schoolsAtRisk = props.schools_at_risk || 0;
+  const schoolPercentage = schools > 0 ? (schoolsAtRisk / schools) * 100 : 0;
   const tierColor = TIER_COLORS[tier] || TIER_COLORS.unknown;
 
   document.getElementById("detailPanel").innerHTML = `
