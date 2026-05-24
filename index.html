@@ -574,7 +574,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 // ═══════════════════════════════════════════════════════
 
 const GEMINI_API_KEY = localStorage.getItem("GEMINI_API_KEY") || "KEY_NOT_SET";
-const GEMINI_MODEL   = "gemini-2.5-flash";
+const GEMINI_MODEL   = "gemini-1.5-flash";
 const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 const LS_CACHE_KEY   = "evi_briefings_bfa";
 
@@ -812,17 +812,11 @@ function showProvinceDetail(props) {
       </div>
       <div class="metric">
         <div class="metric-val">${events.toLocaleString()}</div>
-        <div class="metric-label">Events (Year)</div>
+        <div class="metric-label">Events</div>
       </div>
-    </div>
-    <div class="detail-metrics" style="margin-top: -8px;">
-      <div class="metric" style="background: rgba(139,26,26,0.05);">
-        <div class="metric-val" style="color: var(--tier-critical);">${(props.events_2yr || 0).toLocaleString()}</div>
-        <div class="metric-label">2yr Events</div>
-      </div>
-      <div class="metric" style="background: rgba(139,26,26,0.05);">
-        <div class="metric-val" style="color: var(--tier-critical);">${(props.fatalities_2yr || 0).toLocaleString()}</div>
-        <div class="metric-label">2yr Fatalities</div>
+      <div class="metric">
+        <div class="metric-val">${fatal.toLocaleString()}</div>
+        <div class="metric-label">Fatalities</div>
       </div>
     </div>
 
@@ -868,6 +862,7 @@ function showProvinceDetail(props) {
 
 async function generateSituationBriefing(props) {
   const name    = props.admin2 || "this province";
+  const tier    = (props.priority || "unknown").toLowerCase().replace("_priority","");
   const score   = (props.score * 100).toFixed(0);
   const events2yr = props.events_2yr || 0;
   const fatal2yr = props.fatalities_2yr || 0;
@@ -884,9 +879,24 @@ async function generateSituationBriefing(props) {
     return;
   }
 
-  const prompt = `You are a humanitarian analyst. Explain why the EVI score for ${name} is ${score}/100.
-  The province has recorded ${events2yr} conflict events and ${fatal2yr} fatalities over the past two years.
-  Write exactly 2 sentences: 1st, explain that the EVI score reflects a blend of systemic education challenges and the localized security threat described by the conflict metrics. 2nd, provide one actionable recommendation for enhancing school safety in this specific province.`;
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_KEY_HERE" || GEMINI_API_KEY === "KEY_NOT_SET") {
+    textEl.textContent = `${name} is classified ${tier} priority (EVI ${score}/100).`;
+    textEl.classList.remove("loading");
+    disclaimerEl.innerHTML = "AI summary disabled. Set <code>GEMINI_API_KEY</code> in localStorage.";
+    return;
+  }
+
+  const prompt = `You are a humanitarian analyst providing a rationale for the Education Vulnerability Index (EVI).
+Province: ${name}, Burkina Faso. Year: ${year}. 
+EVI Score: ${score}/100. Priority Classification: ${tier}.
+
+Contextual Data:
+- Yearly Conflict: ${props.events || 0} events, ${props.fatalities || 0} fatalities.
+- 2-Year Persistence: ${events2yr} events, ${fatal2yr} fatalities.
+- National Education Indicators: ${props.oos_raw || 'N/A'} children out of school, ${props.persistence_raw || 'N/A'}% primary persistence rate.
+
+Write exactly 2 sentences explaining why this province is classified as ${tier} priority. 
+If 2-year persistence or a recent spike is high, mention it as a driver. Use the specific numerical values provided.`;
 
   try {
     const res = await fetch(GEMINI_URL, {
@@ -911,7 +921,7 @@ async function generateSituationBriefing(props) {
     disclaimerEl.textContent = "AI-generated (Gemini)";
 
   } catch(err) {
-    textEl.textContent = `Vulnerability score of ${score}/100 is driven by a combination of national education metrics and the ${events2yr} conflict events recorded in the last two years.`;
+    textEl.textContent = `Classification of ${tier} is driven by ${props.oos_raw || 'systemic'} children out of school and ${events2yr} conflict events recorded in the last two years.`;
     textEl.classList.remove("loading");
     disclaimerEl.textContent = `AI explanation unavailable: ${err.message}`;
   }

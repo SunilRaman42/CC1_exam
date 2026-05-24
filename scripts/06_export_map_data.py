@@ -75,6 +75,9 @@ def build_geojson(vuln: pd.DataFrame, boundaries: gpd.GeoDataFrame) -> dict:
             "fatalities":    int(row["fatalities"]) if pd.notna(row["fatalities"]) else 0,
             "events_2yr":    int(row["events_2yr"]) if "events_2yr" in row and pd.notna(row["events_2yr"]) else 0,
             "fatalities_2yr": int(row["fatalities_2yr"]) if "fatalities_2yr" in row and pd.notna(row["fatalities_2yr"]) else 0,
+            "oos_raw":       int(row["oos_raw"]) if "oos_raw" in row and pd.notna(row["oos_raw"]) else None,
+            "persistence_raw": round(float(row["persistence_raw"]), 1) if "persistence_raw" in row and pd.notna(row["persistence_raw"]) else None,
+            "enrolment_raw":   round(float(row["enrolment_raw"]), 1) if "enrolment_raw" in row and pd.notna(row["enrolment_raw"]) else None,
             "edu_baseline":  round(float(row["edu_baseline"]), 3),
             "conflict_score": round(float(row["conflict_score"]), 3),
             "score_basis":   str(row["score_basis"])
