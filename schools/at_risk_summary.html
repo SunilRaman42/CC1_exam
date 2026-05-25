@@ -85,16 +85,40 @@ async function load() {
   });
 
   const tbody = document.querySelector("#schoolTable tbody");
-  // Filter based on JSON v_score > 0.7 AND recent trauma
+  // Filter: Must be in at_risk_years for the year, v_score > 0.7 AND CSV final_score > 0.7 AND has trauma
   const filtered = scores.filter(s => {
+      const lat = s.lat.toFixed(3);
+      const lon = s.lon.toFixed(3);
+      const key = `${lat},${lon}`;
+      const vData = vulnMap[key];
+      
       const isAtRisk = (s.at_risk_years || []).includes(parseInt(year));
       const hasTrauma = (s.trauma || 0) > 0;
       const matchProv = province ? s.province === province : true;
-      return isAtRisk && s.v_score > 0.7 && hasTrauma && matchProv;
+      const score = vData ? parseFloat(vData.final) : s.v_score;
+      
+      return isAtRisk && s.v_score > 0.7 && score > 0.7 && hasTrauma && matchProv;
   });
   
-  // Sort: v_score (desc), then Province (asc)
-  filtered.sort((a, b) => b.v_score - a.v_score || a.province.localeCompare(b.province));
+  // Sort: Conflict Score (desc), then Fragility (desc), then Province (asc)
+  filtered.sort((a, b) => {
+      const latA = a.lat.toFixed(3);
+      const lonA = a.lon.toFixed(3);
+      const latB = b.lat.toFixed(3);
+      const lonB = b.lon.toFixed(3);
+      const vA = vulnMap[`${latA},${lonA}`] || { conflict: 0, fragility: 0 };
+      const vB = vulnMap[`${latB},${lonB}`] || { conflict: 0, fragility: 0 };
+
+      const cA = parseFloat(vA.conflict) || 0;
+      const cB = parseFloat(vB.conflict) || 0;
+      if (cB !== cA) return cB - cA;
+
+      const fA = parseFloat(vA.fragility) || 0;
+      const fB = parseFloat(vB.fragility) || 0;
+      if (fB !== fA) return fB - fA;
+
+      return a.province.localeCompare(b.province);
+  });
   
   if (filtered.length === 0) {
       tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No at-risk schools in this region for ${year}</td></tr>`;
