@@ -522,9 +522,8 @@ async function init() {
       filter: f => f.properties.year === currentYear,
       style: (f) => {
         const priority = f.properties.priority || 'unknown';
-        // Map the priority label to the tier keys. 
-        // e.g., 'lower_priority' -> 'low', 'high_priority' -> 'high'
-        const mappedPriority = priority.replace('_priority', '');
+        // Handle "lower_priority" -> "low" specifically
+        const mappedPriority = (priority === 'lower_priority') ? 'low' : priority.replace('_priority', '');
         const color = TIER_COLORS[mappedPriority] || TIER_COLORS.unknown;
         return { color: "#1A1410", weight: 0.5, fillColor: color, fillOpacity: 0.6 };
       },
@@ -546,10 +545,15 @@ async function init() {
                   <div class="metric-val">${f.properties.school_count || 0}</div>
                   <div class="metric-label">Total Schools</div>
                 </div>
+                ${provData.count > 0 ? `
                 <a href="at_risk_summary.html?year=${currentYear}&province=${encodeURIComponent(f.properties.admin2)}" class="metric" style="text-decoration:none; cursor:pointer;">
                   <div class="metric-val">${provData.count}</div>
                   <div class="metric-label" style="text-decoration:underline;">At-Risk Schools</div>
-                </a>
+                </a>` : `
+                <div class="metric">
+                  <div class="metric-val">0</div>
+                  <div class="metric-label">At-Risk Schools</div>
+                </div>`}
               </div>
             `;
           }
