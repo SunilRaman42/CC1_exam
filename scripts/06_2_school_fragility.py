@@ -72,7 +72,8 @@ FRAGILITY_INDICATORS = [
 # File paths — update if yours differ
 IN_ACLED     = Path("data/clean/acled/HRP_2_countries/Burkina_Faso_geocoded.csv") #hardcoded :(
 IN_EDU     = Path("data/clean/education/master_education.csv")
-IN_SCHOOLS   = Path(f"data/raw/schools/schools_hdx/{ISO3}_schools.geojson")
+# IN_SCHOOLS   = Path(f"data/raw/schools/schools_hdx/{ISO3}_schools.geojson") # OLD - to be deleted later
+IN_SCHOOLS   = Path(f"data/clean/schools/final_cleaned_schools_{ISO3}.csv")
 OUT_CSV    = Path(f"artifacts/schools/{ISO3}_school_vulnerability.csv")
 OUT_GJ     = Path(f"artifacts/schools/schools_{ISO3}.geojson")   # overwrites with scores
 OUT_FRAG   = Path(f"artifacts/schools/{ISO3}_fragility_by_year.csv")
@@ -322,10 +323,12 @@ if __name__ == "__main__":
 
     acled       = pd.read_csv(IN_ACLED)
     edu         = pd.read_csv(IN_EDU)
-    schools_gdf = gpd.read_file(IN_SCHOOLS)
-    if not all(schools_gdf.geometry.geom_type == "Point"):
-        schools_gdf["geometry"] = schools_gdf.geometry.centroid
-
+    df = pd.read_csv(IN_SCHOOLS)
+    schools_gdf = gpd.GeoDataFrame(
+        df, 
+        geometry=gpd.points_from_xy(df.longitude, df.latitude),
+        crs="EPSG:4326"
+    )
     print(f"  ACLED:   {len(acled):,} rows | "
           f"years {int(acled['Year'].min())}–{int(acled['Year'].max())}")
     print(f"  Edu:     {len(edu):,} rows | "
