@@ -570,9 +570,6 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
         <!-- Layer Toggles -->
         <div class="panel-label" style="margin-top:16px;margin-bottom:8px">Map Layers</div>
         <div style="display:flex; flex-direction:column; gap:8px;">
-           <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-muted); cursor:pointer;">
-             <input type="checkbox" id="toggleSchools" checked> <span>Show Schools (Points)</span>
-           </label>
         </div>
       </div>
 
@@ -605,7 +602,6 @@ const LS_CACHE_KEY   = "evi_briefings_bfa";
 const GEOJSON_URL  = "./artifacts/data.geojson";
 const TRENDS_URL   = "./artifacts/trends.json";
 const INSIGHTS_URL = "./artifacts/insights.json";
-const SCHOOLS_URL  = "./artifacts/schools.geojson";
 
 const TIER_COLORS = {
   critical:       "#8B1A1A",
@@ -661,15 +657,13 @@ function saveCache() {
 
 async function loadAll() {
   try {
-    const [geojson, trends, insights, schools] = await Promise.all([
+    const [geojson, trends, insights] = await Promise.all([
       fetch(GEOJSON_URL).then(r => r.json()),
       fetch(TRENDS_URL).then(r => r.json()),
       fetch(INSIGHTS_URL).then(r => r.json()),
-      fetch(SCHOOLS_URL).then(r => r.json()).catch(() => null),
     ]);
 
     trendsData = trends;
-    schoolsData = schools;
 
     geojson.features.forEach(f => {
       const yr = f.properties.year || currentYear;
@@ -688,7 +682,6 @@ async function loadAll() {
     populateStats(insights);
     drawTrend(trends);
     renderChoropleth(currentYear);
-    renderSchools();
 
     document.getElementById("loadingOverlay").classList.add("hidden");
 
@@ -696,38 +689,6 @@ async function loadAll() {
     console.error("Failed to load data:", err);
   }
 }
-
-// ═══════════════════════════════════════════════════════
-// SCHOOLS LAYER
-// ═══════════════════════════════════════════════════════
-
-function renderSchools() {
-  if (schoolsLayer) map.removeLayer(schoolsLayer);
-  if (!schoolsData || !document.getElementById("toggleSchools").checked) return;
-
-  schoolsLayer = L.geoJSON(schoolsData, {
-    pointToLayer: (feature, latlng) => {
-      return L.circleMarker(latlng, {
-        radius: 3,
-        fillColor: "#555",
-        color: "#fff",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-    },
-    onEachFeature: (feature, layer) => {
-      const coords = feature.geometry.coordinates;
-      const lat = coords[1].toFixed(4);
-      const lng = coords[0].toFixed(4);
-      const name = feature.properties.name || `School (${lat}, ${lng})`;
-      layer.bindTooltip(name);
-      layer.bindPopup(`<strong>${name}</strong><br>${feature.properties.amenity || "School"}`);
-    }
-  }).addTo(map);
-}
-
-document.getElementById("toggleSchools").addEventListener("change", renderSchools);
 
 // ═══════════════════════════════════════════════════════
 // CHOROPLETH
@@ -754,9 +715,6 @@ function renderChoropleth(year) {
       });
     }
   }).addTo(map);
-  
-  // Bring schools to front if visible
-  if (schoolsLayer) schoolsLayer.bringToFront();
 
   updateHeaderStats(features);
 }
