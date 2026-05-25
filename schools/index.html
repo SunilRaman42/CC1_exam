@@ -393,7 +393,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
     <div class="stats">
       <a href="../index.html" id="backLink" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
         <div class="stat-num" id="statEvents">—</div>
-        <div class="stat-label" style="text-decoration:underline;">Events (Regional)</div>
+        <div class="stat-label" style="text-decoration:underline;">Events</div>
       </a>
       <div class="stat">
         <div class="stat-num" id="statSchoolsTotal">—</div>
@@ -401,7 +401,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       </div>
       <a href="at_risk_summary.html" id="atRiskLink" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
         <div class="stat-num" id="statSchoolsAtRisk">—</div>
-        <div class="stat-label" style="text-decoration:underline;">High Risk Sites</div>
+        <div class="stat-label" style="text-decoration:underline;">Schools at Risk</div>
       </a>
     </div>
   </header>
@@ -604,9 +604,9 @@ async function init() {
       document.getElementById("statSchoolsTotal").textContent = schoolsData.features.length.toLocaleString();
       document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
 
-      // Calculate events for current year from boundaries
-      const nationalEvents = geoRes.features.filter(f => f.properties.year === currentYear).reduce((s, f) => s + (f.properties.events || 0), 0);
-      document.getElementById("statEvents").textContent = nationalEvents.toLocaleString();
+      // Calculate events for current year from choroplethLayer data
+      const events = choroplethLayer.toGeoJSON().features.reduce((s, f) => s + (f.properties.events || 0), 0);
+      document.getElementById("statEvents").textContent = events.toLocaleString();
     }    function renderHeatmap() {
     if (heatmapLayer) map.removeLayer(heatmapLayer);
 
