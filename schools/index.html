@@ -389,12 +389,12 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       <p class="subhead">
         Detailed analysis of Burkina Faso schools against conflict proximity and historical trauma.
       </p>
-      <a href="../index.html" id="backLink" class="cta-button">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg);"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        Back to Regional View
-      </a>
     </div>
     <div class="stats">
+      <a href="../index.html" id="backLink" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
+        <div class="stat-num" id="statEvents">—</div>
+        <div class="stat-label" style="text-decoration:underline;">Events (Regional)</div>
+      </a>
       <div class="stat">
         <div class="stat-num" id="statSchoolsTotal">—</div>
         <div class="stat-label">Schools</div>
@@ -502,6 +502,9 @@ async function init() {
 
     scoreData = scoreRes;
     schoolsData = schoolsRes;
+    const nationalEvents = geoRes.features.filter(f => f.properties.year === currentYear).reduce((s, f) => s + (f.properties.events || 0), 0);
+    
+    document.getElementById("statEvents").textContent = nationalEvents.toLocaleString();
     
     // Background admin boundaries for context
     const getAtRiskCountsByProvince = (year) => {
@@ -585,12 +588,15 @@ async function init() {
     }
 
     function updateGlobalStats() {
-    // Filter scores for current year
-    const activeScores = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear));
-    document.getElementById("statSchoolsTotal").textContent = schoolsData.features.length.toLocaleString();
-    document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
-    }
-    function renderHeatmap() {
+      // Filter scores for current year
+      const activeScores = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear));
+      document.getElementById("statSchoolsTotal").textContent = schoolsData.features.length.toLocaleString();
+      document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
+
+      // Calculate events for current year from boundaries
+      const nationalEvents = geoRes.features.filter(f => f.properties.year === currentYear).reduce((s, f) => s + (f.properties.events || 0), 0);
+      document.getElementById("statEvents").textContent = nationalEvents.toLocaleString();
+    }    function renderHeatmap() {
     if (heatmapLayer) map.removeLayer(heatmapLayer);
 
     // Use vulnerability score for heatmap intensity (0-1)
