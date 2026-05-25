@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>At-Risk Schools Summary Report</title>
+<style>
+  body { font-family: 'IBM Plex Sans', sans-serif; padding: 40px; background: #F5F0E8; color: #1A1410; }
+  h1 { font-family: 'Libre Baskerville', serif; color: #8B1A1A; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #CCC; padding: 8px; text-align: left; }
+  th { background: #E3DDD0; }
+  .methodology { margin-top: 40px; padding: 20px; background: #EDE8DC; border-radius: 8px; }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<button class="no-print" onclick="window.print()">Print Report</button>
+<h1 id="title">At-Risk Schools Summary: <span id="yearVal"></span></h1>
+<table id="schoolTable">
+  <thead><tr><th>Name</th><th>Province</th><th>Lat</th><th>Lon</th><th>Score</th></tr></thead>
+  <tbody></tbody>
+</table>
+<div class="methodology">
+  <h3>Methodology</h3>
+  <p>Risk is calculated as: <em>Conflict Pressure × System Fragility</em>. Schools with a final score > 0.7 are flagged as "At Risk". Data is normalized across a 0-1 range.</p>
+</div>
+<script>
+async function load() {
+  const params = new URLSearchParams(window.location.search);
+  const year = params.get('year') || '2024';
+  document.getElementById('yearVal').textContent = year;
+  const [scores, vulnerability] = await Promise.all([
+    fetch("../artifacts/school_vulnerability_scores.json").then(r => r.json()),
+    fetch("../artifacts/schools/BFA_school_vulnerability.csv").then(r => r.text())
+  ]);
+  const tbody = document.querySelector("#schoolTable tbody");
+  const filtered = scores.filter(s => (s.at_risk_years || []).includes(parseInt(year)) && s.v_score > 0.7);
+  filtered.forEach(s => {
+    const row = `<tr><td>${s.name || 'Unnamed'}</td><td>${s.province}</td><td>${s.lat}</td><td>${s.lon}</td><td>${(s.v_score*100).toFixed(0)}</td></tr>`;
+    tbody.innerHTML += row;
+  });
+}
+load();
+</script>
+</body>
+</html>

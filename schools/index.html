@@ -399,10 +399,10 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
         <div class="stat-num" id="statSchoolsTotal">—</div>
         <div class="stat-label">Schools</div>
       </div>
-      <div class="stat">
+      <a href="at_risk_summary.html" id="atRiskLink" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
         <div class="stat-num" id="statSchoolsAtRisk">—</div>
-        <div class="stat-label">High Risk Sites</div>
-      </div>
+        <div class="stat-label" style="text-decoration:underline;">High Risk Sites</div>
+      </a>
     </div>
   </header>
 
@@ -578,6 +578,7 @@ async function init() {
       currentYear = parseInt(e.target.value);
       display.textContent = currentYear;
       document.getElementById("backLink").href = `../index.html?year=${currentYear}`;
+      document.getElementById("atRiskLink").href = `at_risk_summary.html?year=${currentYear}`;
 
       // Update background boundaries
       if (choroplethLayer) {
@@ -592,7 +593,6 @@ async function init() {
       // Update stats
       updateGlobalStats();
     });
-
     } catch (e) {
     console.error("Load failed", e);
     }
