@@ -73,8 +73,8 @@ async function load() {
   rows.forEach(row => {
     const cols = parseCSVLine(row);
     if (cols.length >= 7) {
-        const lat = parseFloat(cols[2]).toFixed(3);
-        const lon = parseFloat(cols[3]).toFixed(3);
+        const lat = parseFloat(cols[2]).toFixed(4);
+        const lon = parseFloat(cols[3]).toFixed(4);
         const key = `${lat},${lon}`;
         vulnMap[key] = {
             conflict: parseFloat(cols[4]).toFixed(3),
@@ -87,8 +87,8 @@ async function load() {
   const tbody = document.querySelector("#schoolTable tbody");
   // Filter: Must be in at_risk_years for the year, v_score > 0.7 AND CSV final_score > 0.7 AND has trauma
   const filtered = scores.filter(s => {
-      const lat = s.lat.toFixed(3);
-      const lon = s.lon.toFixed(3);
+      const lat = s.lat.toFixed(4);
+      const lon = s.lon.toFixed(4);
       const key = `${lat},${lon}`;
       const vData = vulnMap[key];
       
@@ -102,10 +102,10 @@ async function load() {
   
   // Sort: Conflict Score (desc), then Fragility (desc), then Province (asc)
   filtered.sort((a, b) => {
-      const latA = a.lat.toFixed(3);
-      const lonA = a.lon.toFixed(3);
-      const latB = b.lat.toFixed(3);
-      const lonB = b.lon.toFixed(3);
+      const latA = a.lat.toFixed(4);
+      const lonA = a.lon.toFixed(4);
+      const latB = b.lat.toFixed(4);
+      const lonB = b.lon.toFixed(4);
       const vA = vulnMap[`${latA},${lonA}`] || { conflict: 0, fragility: 0 };
       const vB = vulnMap[`${latB},${lonB}`] || { conflict: 0, fragility: 0 };
 
@@ -124,8 +124,8 @@ async function load() {
       tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No at-risk schools in this region for ${year}</td></tr>`;
   } else {
       filtered.forEach((s, index) => {
-        const lat = s.lat.toFixed(3);
-        const lon = s.lon.toFixed(3);
+        const lat = s.lat.toFixed(4);
+        const lon = s.lon.toFixed(4);
         const key = `${lat},${lon}`;
         const vData = vulnMap[key] || { conflict: 'N/A', fragility: 'N/A', final: (s.v_score || 0).toFixed(3) };
         const row = `<tr>

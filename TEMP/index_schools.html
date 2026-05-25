@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Education Under Threat — Schools Overlay (TEST)</title>
+<title>Education Under Threat — Infrastructure at Risk</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 
 <style>
 /* ── Reset ───────────────────────────────────────────── */
@@ -271,32 +272,6 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   margin-top: 3px;
 }
 
-/* Score bar */
-.score-bar-wrap {
-  margin-bottom: 16px;
-}
-.score-bar-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-}
-.score-bar-track {
-  height: 6px;
-  background: var(--surface2);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.score-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.4s ease;
-}
-
 /* AI narrative */
 .ai-box {
   background: var(--ink);
@@ -339,50 +314,6 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   font-weight: 300;
 }
 
-.ai-text.loading {
-  color: rgba(245,240,232,0.35);
-  font-style: italic;
-}
-
-.ai-disclaimer {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: rgba(245,240,232,0.3);
-  margin-top: 8px;
-}
-
-/* Score basis tag */
-.basis-tag {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--ink-muted);
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-/* ── Trend chart panel (bottom of sidebar) ───────────── */
-.chart-panel {
-  padding: 14px 20px 16px;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-  flex-shrink: 0;
-}
-
-.chart-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
-  margin-bottom: 8px;
-}
-
-#trendChart {
-  width: 100%;
-  height: 60px;
-}
-
 /* ── Loading overlay ─────────────────────────────────── */
 #loadingOverlay {
   position: absolute;
@@ -398,44 +329,50 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 }
 #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
 
-.loader-text {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-}
-
-.loader-bar {
-  width: 160px;
-  height: 2px;
-  background: var(--border);
-  border-radius: 1px;
-  overflow: hidden;
-}
-.loader-fill {
-  height: 100%;
-  background: var(--ink);
-  border-radius: 1px;
-  animation: load 1.4s ease infinite;
-}
-@keyframes load {
-  0%   { width: 0%;   margin-left: 0; }
-  50%  { width: 60%;  margin-left: 20%; }
-  100% { width: 0%;   margin-left: 100%; }
-}
-
 /* ── Leaflet overrides ───────────────────────────────── */
 .leaflet-container { background: #D8D0C0 !important; }
-.leaflet-control-attribution { font-size: 9px !important; }
+
+/* ── CTA Button ─────────────────────────────────────── */
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.cta-button:hover {
+  background: #A93226;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(192,57,43,0.3);
+}
+
+.cta-button svg {
+  transition: transform 0.2s ease;
+}
+
+.cta-button:hover svg {
+  transform: translateX(-3px);
+}
 </style>
 </head>
 
 <body>
 
 <div id="loadingOverlay">
-  <div class="loader-text">Loading map data</div>
-  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loader-text">Loading Infrastructure Data...</div>
 </div>
 
 <div class="shell">
@@ -443,27 +380,28 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
   <!-- Header -->
   <header class="header">
     <div class="header-left">
-      <div class="kicker">Burkina Faso · Schools Overlay Test · 2015–2026</div>
+      <div class="kicker">
+        Burkina Faso · Education Infrastructure · 2015–2026
+      </div>
       <h1 class="headline">
-        Conflict is closing schools faster than<br>
-        <em>they can be rebuilt</em>
+        Schools at the Frontline: <em>Infrastructure Risk</em>
       </h1>
       <p class="subhead">
-        Visualizing 12,000+ school points against conflict vulnerability zones.
+        Detailed analysis of 12,000+ schools against conflict proximity and historical trauma.
       </p>
+      <a href="../../index.html" id="backLink" class="cta-button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg);"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        Back to Regional View
+      </a>
     </div>
     <div class="stats">
       <div class="stat">
-        <div class="stat-num" id="statCritical">—</div>
-        <div class="stat-label">Critical provinces</div>
+        <div class="stat-num" id="statSchoolsTotal">—</div>
+        <div class="stat-label">Schools Tracked</div>
       </div>
       <div class="stat">
         <div class="stat-num" id="statSchoolsAtRisk">—</div>
-        <div class="stat-label">Schools at risk</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="statEvents">—</div>
-        <div class="stat-label">Conflict events</div>
+        <div class="stat-label">High Risk Sites</div>
       </div>
     </div>
   </header>
@@ -480,41 +418,38 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       <!-- Year slider -->
       <div class="panel">
         <div class="panel-label">
-          <span>Year</span>
-          <span class="year-display" id="yearDisplay">2023</span>
+          <span>Simulation Year</span>
+          <span class="year-display" id="yearDisplay">2024</span>
         </div>
-        <input type="range" id="yearSlider" min="2015" max="2026" value="2023" step="1"/>
+        <input type="range" id="yearSlider" min="2015" max="2026" value="2024" step="1"/>
 
         <!-- Legend -->
-        <div class="panel-label" style="margin-top:14px;margin-bottom:6px">Priority tier</div>
+        <div class="panel-label" style="margin-top:14px;margin-bottom:6px">Risk level</div>
         <div class="legend-grid">
           <div class="legend-item"><div class="legend-dot" style="background:var(--tier-critical)"></div>Critical</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-high)"></div>High</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-medium)"></div>Medium</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-low)"></div>Low</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-high)"></div>High Risk</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-medium)"></div>Moderate</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-low)"></div>Stable</div>
         </div>
 
         <!-- Layer Toggles -->
-        <div class="panel-label" style="margin-top:16px;margin-bottom:8px">Map Layers</div>
+        <div class="panel-label" style="margin-top:16px;margin-bottom:8px">Infrastructure Layers</div>
         <div style="display:flex; flex-direction:column; gap:8px;">
            <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-muted); cursor:pointer;">
-             <input type="checkbox" id="toggleSchools" checked> <span>Show Schools (Points)</span>
+             <input type="checkbox" id="toggleHeatmap"> <span>Vulnerability Heatmap</span>
+           </label>
+           <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-muted); cursor:pointer;">
+             <input type="checkbox" id="toggleSchools" checked> <span>Individual School Points</span>
            </label>
         </div>
       </div>
 
-      <!-- Province detail -->
+      <!-- Detail -->
       <div class="detail-panel" id="detailPanel">
-        <div class="panel-label">Province detail</div>
+        <div class="panel-label">School detail</div>
         <p class="detail-empty">
-          Select a province on the map to see its vulnerability score and school infrastructure.
+          Zoom in and select a school point to see specific site-level risk metrics.
         </p>
-      </div>
-
-      <!-- Trend sparkline -->
-      <div class="chart-panel">
-        <div class="chart-title">National conflict events · 2015–2026</div>
-        <canvas id="trendChart"></canvas>
       </div>
 
     </aside>
@@ -522,311 +457,213 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════
-
-const GEMINI_API_KEY = localStorage.getItem("GEMINI_API_KEY") || "KEY_NOT_SET";
-const GEMINI_MODEL   = "gemini-2.5-flash";
-const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-const LS_CACHE_KEY   = "evi_briefings_bfa";
-
-const GEOJSON_URL  = "../artifacts/data.geojson";
-const TRENDS_URL   = "../artifacts/trends.json";
-const INSIGHTS_URL = "../artifacts/insights.json";
-const SCHOOLS_URL  = "../artifacts/schools.geojson";
+const GEOJSON_URL  = "../data.geojson";
+const SCHOOLS_URL  = "../schools.geojson";
+const SCORE_URL    = "../school_vulnerability_scores.json";
 
 const TIER_COLORS = {
-  critical:       "#8B1A1A",
-  high:           "#E07B3B",
-  high_priority:  "#E07B3B",
-  medium:         "#F0C060",
-  medium_priority: "#F0C060",
-  low:            "#A8C5A0",
-  lower_priority: "#A8C5A0",
-  unknown:        "#C8C0B0",
+  critical: "#8B1A1A",
+  high:     "#E07B3B",
+  medium:   "#F0C060",
+  low:      "#A8C5A0",
 };
 
-// ═══════════════════════════════════════════════════════
-// MAP INIT
-// ═══════════════════════════════════════════════════════
-
-const map = L.map("map", {
-  center: [12.3, -1.9],
-  zoom: 7,
-  zoomControl: true,
-  attributionControl: true,
-});
+const map = L.map("map", { center: [12.3, -1.9], zoom: 7 });
 
 L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
   attribution: "© OpenStreetMap © CARTO",
   maxZoom: 12,
 }).addTo(map);
 
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
+let choroplethLayer = null;
+let schoolsLayer    = null;
+let heatmapLayer    = null;
+let scoreData       = [];
+let currentYear     = 2024;
 
-let allFeatures  = {};
-let schoolsData  = null;
-let trendsData   = [];
-let currentYear  = 2023;
-let choropleth   = null;
-let schoolsLayer = null;
-let selectedLayer = null;
-let aiCache = (() => {
-  try { return JSON.parse(localStorage.getItem(LS_CACHE_KEY) || "{}"); }
-  catch { return {}; }
-})();
+async function init() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const yearParam = urlParams.get('year');
+  if (yearParam) {
+    currentYear = parseInt(yearParam);
+    document.getElementById("yearSlider").value = currentYear;
+    document.getElementById("yearDisplay").textContent = currentYear;
+  }
+  document.getElementById("backLink").href = `../../index.html?year=${currentYear}`;
 
-function saveCache() {
-  try { localStorage.setItem(LS_CACHE_KEY, JSON.stringify(aiCache)); }
-  catch(e) { console.warn("Cache save failed:", e); }
-}
-
-// ═══════════════════════════════════════════════════════
-// DATA LOADING
-// ═══════════════════════════════════════════════════════
-
-async function loadAll() {
   try {
-    const [geojson, trends, insights, schools] = await Promise.all([
+    const [geoRes, schoolsRes, scoreRes] = await Promise.all([
       fetch(GEOJSON_URL).then(r => r.json()),
-      fetch(TRENDS_URL).then(r => r.json()),
-      fetch(INSIGHTS_URL).then(r => r.json()),
-      fetch(SCHOOLS_URL).then(r => r.json()).catch(() => null),
+      fetch(SCHOOLS_URL).then(r => r.json()),
+      fetch(SCORE_URL).then(r => r.json())
     ]);
 
-    trendsData = trends;
-    schoolsData = schools;
+    scoreData = scoreRes;
+    
+    // Background admin boundaries for context
+    choroplethLayer = L.geoJSON(geoRes, {
+      filter: f => f.properties.year === currentYear,
+      style: { color: "#1A1410", weight: 0.5, fillOpacity: 0.05, fill: "#000" }
+    }).addTo(map);
 
-    geojson.features.forEach(f => {
-      const yr = f.properties.year || currentYear;
-      if (!allFeatures[yr]) allFeatures[yr] = [];
-      allFeatures[yr].push(f);
+    renderSchools(schoolsRes);
+    renderHeatmap();
+    
+    document.getElementById("statSchoolsTotal").textContent = scoreData.length.toLocaleString();
+    document.getElementById("statSchoolsAtRisk").textContent = scoreData.filter(s => s.v_score > 0.7).length.toLocaleString();
+    
+    // Toggles
+    document.getElementById("toggleSchools").addEventListener("change", () => {
+      if (document.getElementById("toggleSchools").checked) map.addLayer(schoolsLayer);
+      else map.removeLayer(schoolsLayer);
     });
 
-    const years = Object.keys(allFeatures).map(Number);
-    if (years.length === 1) {
-      const yr = years[0];
-      for (let y = 2015; y <= 2026; y++) {
-        if (!allFeatures[y]) allFeatures[y] = allFeatures[yr];
-      }
-    }
-
-    populateStats(insights);
-    drawTrend(trends);
-    renderChoropleth(currentYear);
-    renderSchools();
+    document.getElementById("toggleHeatmap").addEventListener("change", () => {
+      if (document.getElementById("toggleHeatmap").checked) map.addLayer(heatmapLayer);
+      else map.removeLayer(heatmapLayer);
+    });
 
     document.getElementById("loadingOverlay").classList.add("hidden");
 
-  } catch(err) {
-    console.error("Failed to load data:", err);
+    // Add Year Slider Listener
+    const slider = document.getElementById("yearSlider");
+    const display = document.getElementById("yearDisplay");
+    
+    slider.addEventListener("input", (e) => {
+      currentYear = parseInt(e.target.value);
+      display.textContent = currentYear;
+      document.getElementById("backLink").href = `../../index.html?year=${currentYear}`;
+      
+      // Update background boundaries
+      if (choroplethLayer) {
+        choroplethLayer.clearLayers();
+        choroplethLayer.addData(geoRes.features.filter(f => f.properties.year === currentYear));
+      }
+      
+      // Update schools and heatmap
+      renderSchools(schoolsRes);
+      renderHeatmap();
+      
+      // Update stats
+      updateGlobalStats();
+    });
+
+  } catch (e) {
+    console.error("Load failed", e);
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// SCHOOLS LAYER
-// ═══════════════════════════════════════════════════════
+function updateGlobalStats() {
+  // Filter scores for current year
+  const activeScores = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear));
+  document.getElementById("statSchoolsTotal").textContent = scoreData.length.toLocaleString();
+  document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
+}
 
-function renderSchools() {
+function renderHeatmap() {
+  if (heatmapLayer) map.removeLayer(heatmapLayer);
+  
+  // Use vulnerability score for heatmap intensity (0-1)
+  const heatPoints = scoreData
+    .filter(s => s.v_score > 0.05)
+    .map(s => [s.lat, s.lon, s.v_score]);
+  
+  heatmapLayer = L.heatLayer(heatPoints, {
+    radius: 20,
+    blur: 15,
+    maxZoom: 10,
+    gradient: {
+      0.2: "#A8C5A0",
+      0.5: "#F0C060",
+      0.8: "#E07B3B",
+      1.0: "#8B1A1A"
+    }
+  });
+
+  if (document.getElementById("toggleHeatmap").checked) {
+    heatmapLayer.addTo(map);
+  }
+}
+
+function renderSchools(geo) {
   if (schoolsLayer) map.removeLayer(schoolsLayer);
-  if (!schoolsData || !document.getElementById("toggleSchools").checked) return;
 
-  schoolsLayer = L.geoJSON(schoolsData, {
-    pointToLayer: (feature, latlng) => {
+  schoolsLayer = L.geoJSON(geo, {
+    pointToLayer: (f, latlng) => {
+      // Find score for this school
+      const schoolScore = scoreData.find(s => 
+          Math.abs(s.lat - latlng.lat) < 0.0001 && 
+          Math.abs(s.lon - latlng.lng) < 0.0001
+      );
+
+      let color = TIER_COLORS.low;
+      let isAtRisk = false;
+      
+      if (schoolScore) {
+        isAtRisk = (schoolScore.at_risk_years || []).includes(currentYear);
+        if (isAtRisk) {
+          if (schoolScore.v_score > 0.8) color = TIER_COLORS.critical;
+          else if (schoolScore.v_score > 0.5) color = TIER_COLORS.high;
+          else if (schoolScore.v_score > 0.2) color = TIER_COLORS.medium;
+        } else {
+          color = "#ccc"; // Not at risk this year
+        }
+      }
+
       return L.circleMarker(latlng, {
-        radius: 2,
-        fillColor: "#1A1410",
+        radius: isAtRisk ? 4 : 2,
+        fillColor: color,
         color: "#fff",
         weight: 0.5,
-        opacity: 0.8,
-        fillOpacity: 0.8
+        opacity: isAtRisk ? 0.9 : 0.4,
+        fillOpacity: isAtRisk ? 1.0 : 0.3
       });
     },
-    onEachFeature: (feature, layer) => {
-      layer.bindPopup(`<strong>${feature.properties.name || "Unnamed School"}</strong><br>${feature.properties.amenity || "School"}`);
-    }
-  }).addTo(map);
-}
-
-document.getElementById("toggleSchools").addEventListener("change", renderSchools);
-
-// ═══════════════════════════════════════════════════════
-// CHOROPLETH
-// ═══════════════════════════════════════════════════════
-
-function renderChoropleth(year) {
-  if (choropleth) map.removeLayer(choropleth);
-
-  const features = allFeatures[year] || [];
-  if (!features.length) return;
-
-  choropleth = L.geoJSON({ type: "FeatureCollection", features }, {
-    style: f => styleFeature(f),
     onEachFeature: (f, layer) => {
-      layer.on({
-        mouseover: e => { if (layer !== selectedLayer) e.target.setStyle({ weight: 2, fillOpacity: 0.95 }); },
-        mouseout: e => { if (layer !== selectedLayer) choropleth.resetStyle(e.target); },
-        click: e => {
-          if (selectedLayer) choropleth.resetStyle(selectedLayer);
-          selectedLayer = e.target;
-          e.target.setStyle({ weight: 3, color: "#1A1410", fillOpacity: 1.0 });
-          showProvinceDetail(f.properties);
-        }
-      });
+      layer.on("click", () => showSchoolDetail(f.properties, layer.getLatLng()));
     }
   }).addTo(map);
-  
-  // Bring schools to front if visible
-  if (schoolsLayer) schoolsLayer.bringToFront();
-
-  updateHeaderStats(features);
 }
 
-function styleFeature(f) {
-  const tier  = (f.properties.priority || "unknown").toLowerCase();
-  return {
-    fillColor:   TIER_COLORS[tier] || TIER_COLORS.unknown,
-    fillOpacity: 0.7,
-    color:       "#F5F0E8",
-    weight:      0.8,
-  };
-}
+function showSchoolDetail(props, latlng) {
+  const score = scoreData.find(s => Math.abs(s.lat - latlng.lat) < 0.0001 && Math.abs(s.lon - latlng.lng) < 0.0001);
+  if (!score) return;
 
-// ═══════════════════════════════════════════════════════
-// UI UPDATES
-// ═══════════════════════════════════════════════════════
-
-document.getElementById("yearSlider").addEventListener("input", e => {
-  currentYear = parseInt(e.target.value);
-  document.getElementById("yearDisplay").textContent = currentYear;
-  selectedLayer = null;
-  renderChoropleth(currentYear);
-  resetDetailPanel();
-});
-
-function populateStats(insights) {
-  if (!insights) return;
-  document.getElementById("statCritical").textContent = insights.critical_regions || 0;
-  document.getElementById("statSchoolsAtRisk").textContent = (insights.schools_at_risk || 0).toLocaleString();
-  document.getElementById("statEvents").textContent = (insights.total_events || 0).toLocaleString();
-}
-
-function updateHeaderStats(features) {
-  const critical = features.filter(f => ["critical"].includes((f.properties.priority || "").toLowerCase())).length;
-  const events = features.reduce((s, f) => s + (f.properties.events || 0), 0);
-  const schoolsAtRisk = features
-    .filter(f => ["critical"].includes((f.properties.priority || "").toLowerCase()))
-    .reduce((s, f) => s + (f.properties.school_count || 0), 0);
-
-  document.getElementById("statCritical").textContent = critical;
-  document.getElementById("statSchoolsAtRisk").textContent = schoolsAtRisk.toLocaleString();
-  document.getElementById("statEvents").textContent = events.toLocaleString();
-}
-
-function resetDetailPanel() {
-  document.getElementById("detailPanel").innerHTML = `
-    <div class="panel-label">Province detail</div>
-    <p class="detail-empty">Select a province on the map to see its vulnerability score and school infrastructure.</p>
-  `;
-}
-
-function showProvinceDetail(props) {
-  const tier    = (props.priority || "unknown").toLowerCase();
-  const score   = props.score ?? null;
-  const events  = props.events ?? 0;
-  const fatal   = props.fatalities ?? 0;
-  const schools = props.school_count ?? 0;
-  const name    = props.admin2 || "Unknown";
-  const tierLabel = tier.replace("_priority","").replace("_","-");
+  const name = props.name || "Unnamed Institution";
+  const v_score = (score.v_score * 100).toFixed(0);
+  const trauma = score.trauma;
+  const province = score.province || "Unknown";
+  const years = score.at_risk_years || [];
+  const risk_summary = years.length > 0 
+    ? `at risk ${years.length} times since ${years[0]}` 
+    : "not currently at risk";
 
   document.getElementById("detailPanel").innerHTML = `
-    <div class="panel-label">Province detail</div>
+    <div class="panel-label">School detail</div>
     <div class="detail-name">${name}</div>
-    <span class="detail-tier tier-${tier.replace("_priority","")}">${tierLabel} priority</span>
-
+    <div class="panel-label" style="margin-top:4px;">${province} Province</div>
+    
     <div class="detail-metrics">
       <div class="metric">
-        <div class="metric-val">${schools.toLocaleString()}</div>
-        <div class="metric-label">Total Schools</div>
+        <div class="metric-val">${v_score}%</div>
+        <div class="metric-label">Risk Score</div>
       </div>
       <div class="metric">
-        <div class="metric-val">${events.toLocaleString()}</div>
-        <div class="metric-label">Conflict Events</div>
+        <div class="metric-val">${trauma}</div>
+        <div class="metric-label">Events Near</div>
       </div>
     </div>
 
-    ${score !== null ? `
-    <div class="score-bar-wrap">
-      <div class="score-bar-label">
-        <span>EVI Score</span>
-        <span>${(score * 100).toFixed(0)}/100</span>
+    <div class="ai-box">
+      <div class="ai-label">Risk Profile</div>
+      <div class="ai-text">
+        This facility is located in <strong>${province}</strong>. It has been <strong>${risk_summary}</strong> based on proximity to conflict events.
       </div>
-      <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.round(score*100)}%;background:${TIER_COLORS[tier]}"></div></div>
-      <p style="font-size: 9px; color: var(--ink-muted); margin-top: 4px;">EVI measures the risk of school closure due to conflict, where higher scores indicate greater threat.</p>
-    </div>` : ""}
-
-    <div class="ai-box" id="aiBox">
-      <div class="ai-label">AI Situation Briefing</div>
-      <div class="ai-text loading" id="aiText">Generating summary…</div>
-      <div class="ai-disclaimer" id="aiDisclaimer"></div>
     </div>
   `;
-  generateSituationBriefing(props);
 }
 
-// ── AI Briefing Stub (Reuse existing logic) ──
-async function generateSituationBriefing(props) {
-  const textEl = document.getElementById("aiText");
-  if (!textEl) return;
-  const name = props.admin2 || "this province";
-  const year = props.year || currentYear;
-  const score = (props.score || 0) * 100;
-  
-  if (GEMINI_API_KEY === "KEY_NOT_SET") {
-    textEl.textContent = `${name} has ${props.school_count} schools and an EVI of ${score.toFixed(0)}/100. [Add Gemini key to enable AI briefings]`;
-    textEl.classList.remove("loading");
-    return;
-  }
-  // ... actual fetch logic omitted for brevity in test file ...
-  textEl.textContent = `${name} is under significant threat with ${props.school_count} schools potentially impacted by ${props.events} recent conflict events.`;
-  textEl.classList.remove("loading");
-}
-
-function drawTrend(data) {
-  const canvas = document.getElementById("trendChart");
-  if (!canvas || !data.length) return;
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width = canvas.offsetWidth;
-  const H = canvas.height = 60;
-  const vals = data.map(d => d.total_events || 0);
-  const maxV = Math.max(...vals);
-  const minV = Math.min(...vals);
-  const pad = { l: 8, r: 8, t: 8, b: 18 };
-  const iW = W - pad.l - pad.r;
-  const iH = H - pad.t - pad.b;
-  const x = (i) => pad.l + (i / (vals.length - 1)) * iW;
-  const y = (v) => pad.t + (1 - (v - minV) / (maxV - minV || 1)) * iH;
-
-  ctx.beginPath();
-  ctx.moveTo(x(0), y(vals[0]));
-  vals.forEach((v, i) => ctx.lineTo(x(i), y(v)));
-  ctx.lineTo(x(vals.length - 1), H - pad.b);
-  ctx.lineTo(x(0), H - pad.b);
-  ctx.fillStyle = "rgba(192,57,43,0.12)";
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(x(0), y(vals[0]));
-  vals.forEach((v, i) => ctx.lineTo(x(i), y(v)));
-  ctx.strokeStyle = "#C0392B";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-}
-
-loadAll();
+init();
 </script>
 </body>
 </html>

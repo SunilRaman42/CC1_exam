@@ -387,9 +387,9 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
         Schools at the Frontline: <em>Infrastructure Risk</em>
       </h1>
       <p class="subhead">
-        Detailed analysis of 12,000+ schools against conflict proximity and historical trauma.
+        Detailed analysis of Burkina Faso schools against conflict proximity and historical trauma.
       </p>
-      <a href="../../index.html" id="backLink" class="cta-button">
+      <a href="../index.html" id="backLink" class="cta-button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg);"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         Back to Regional View
       </a>
@@ -457,9 +457,9 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 </div>
 
 <script>
-const GEOJSON_URL  = "../data.geojson";
-const SCHOOLS_URL  = "../schools.geojson";
-const SCORE_URL    = "../school_vulnerability_scores.json";
+const GEOJSON_URL  = "../artifacts/data.geojson";
+const SCHOOLS_URL  = "../artifacts/schools.geojson";
+const SCORE_URL    = "../artifacts/school_vulnerability_scores.json";
 
 const TIER_COLORS = {
   critical: "#8B1A1A",
@@ -479,6 +479,7 @@ let choroplethLayer = null;
 let schoolsLayer    = null;
 let heatmapLayer    = null;
 let scoreData       = [];
+let schoolsData     = null;
 let currentYear     = 2024;
 
 async function init() {
@@ -489,7 +490,7 @@ async function init() {
     document.getElementById("yearSlider").value = currentYear;
     document.getElementById("yearDisplay").textContent = currentYear;
   }
-  document.getElementById("backLink").href = `../../index.html?year=${currentYear}`;
+  document.getElementById("backLink").href = `../index.html?year=${currentYear}`;
 
   try {
     const [geoRes, schoolsRes, scoreRes] = await Promise.all([
@@ -499,6 +500,7 @@ async function init() {
     ]);
 
     scoreData = scoreRes;
+    schoolsData = schoolsRes;
     
     // Background admin boundaries for context
     choroplethLayer = L.geoJSON(geoRes, {
@@ -506,12 +508,12 @@ async function init() {
       style: { color: "#1A1410", weight: 0.5, fillOpacity: 0.05, fill: "#000" }
     }).addTo(map);
 
-    renderSchools(schoolsRes);
+    renderSchools(schoolsData);
     renderHeatmap();
-    
-    document.getElementById("statSchoolsTotal").textContent = scoreData.length.toLocaleString();
-    document.getElementById("statSchoolsAtRisk").textContent = scoreData.filter(s => s.v_score > 0.7).length.toLocaleString();
-    
+
+    document.getElementById("statSchoolsTotal").textContent = schoolsData.features.length.toLocaleString();
+    document.getElementById("statSchoolsAtRisk").textContent = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear) && s.v_score > 0.7).length.toLocaleString();
+
     // Toggles
     document.getElementById("toggleSchools").addEventListener("change", () => {
       if (document.getElementById("toggleSchools").checked) map.addLayer(schoolsLayer);
@@ -528,47 +530,46 @@ async function init() {
     // Add Year Slider Listener
     const slider = document.getElementById("yearSlider");
     const display = document.getElementById("yearDisplay");
-    
+
     slider.addEventListener("input", (e) => {
       currentYear = parseInt(e.target.value);
       display.textContent = currentYear;
-      document.getElementById("backLink").href = `../../index.html?year=${currentYear}`;
-      
+      document.getElementById("backLink").href = `../index.html?year=${currentYear}`;
+
       // Update background boundaries
       if (choroplethLayer) {
         choroplethLayer.clearLayers();
         choroplethLayer.addData(geoRes.features.filter(f => f.properties.year === currentYear));
       }
-      
+
       // Update schools and heatmap
-      renderSchools(schoolsRes);
+      renderSchools(schoolsData);
       renderHeatmap();
-      
+
       // Update stats
       updateGlobalStats();
     });
 
-  } catch (e) {
+    } catch (e) {
     console.error("Load failed", e);
-  }
-}
+    }
+    }
 
-function updateGlobalStats() {
-  // Filter scores for current year
-  const activeScores = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear));
-  document.getElementById("statSchoolsTotal").textContent = scoreData.length.toLocaleString();
-  document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
-}
+    function updateGlobalStats() {
+    // Filter scores for current year
+    const activeScores = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear));
+    document.getElementById("statSchoolsTotal").textContent = schoolsData.features.length.toLocaleString();
+    document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
+    }
+    function renderHeatmap() {
+    if (heatmapLayer) map.removeLayer(heatmapLayer);
 
-function renderHeatmap() {
-  if (heatmapLayer) map.removeLayer(heatmapLayer);
-  
-  // Use vulnerability score for heatmap intensity (0-1)
-  const heatPoints = scoreData
+    // Use vulnerability score for heatmap intensity (0-1)
+    const heatPoints = scoreData
     .filter(s => s.v_score > 0.05)
     .map(s => [s.lat, s.lon, s.v_score]);
-  
-  heatmapLayer = L.heatLayer(heatPoints, {
+
+    heatmapLayer = L.heatLayer(heatPoints, {
     radius: 20,
     blur: 15,
     maxZoom: 10,
@@ -578,17 +579,17 @@ function renderHeatmap() {
       0.8: "#E07B3B",
       1.0: "#8B1A1A"
     }
-  });
+    });
 
-  if (document.getElementById("toggleHeatmap").checked) {
+    if (document.getElementById("toggleHeatmap").checked) {
     heatmapLayer.addTo(map);
-  }
-}
+    }
+    }
 
-function renderSchools(geo) {
-  if (schoolsLayer) map.removeLayer(schoolsLayer);
+    function renderSchools(geo) {
+    if (schoolsLayer) map.removeLayer(schoolsLayer);
 
-  schoolsLayer = L.geoJSON(geo, {
+    schoolsLayer = L.geoJSON(geo, {
     pointToLayer: (f, latlng) => {
       // Find score for this school
       const schoolScore = scoreData.find(s => 
@@ -596,27 +597,27 @@ function renderSchools(geo) {
           Math.abs(s.lon - latlng.lng) < 0.0001
       );
 
-      let color = TIER_COLORS.low;
+      let color = "#3498DB"; // Default blue
+      let radius = 4;
       let isAtRisk = false;
-      
+
       if (schoolScore) {
         isAtRisk = (schoolScore.at_risk_years || []).includes(currentYear);
         if (isAtRisk) {
-          if (schoolScore.v_score > 0.8) color = TIER_COLORS.critical;
-          else if (schoolScore.v_score > 0.5) color = TIER_COLORS.high;
-          else if (schoolScore.v_score > 0.2) color = TIER_COLORS.medium;
-        } else {
-          color = "#ccc"; // Not at risk this year
+            radius = 5;
+            if (schoolScore.v_score > 0.7) color = TIER_COLORS.critical;
+            else if (schoolScore.v_score > 0.5) color = TIER_COLORS.high;
+            else color = TIER_COLORS.medium;
         }
       }
 
       return L.circleMarker(latlng, {
-        radius: isAtRisk ? 4 : 2,
+        radius: radius,
         fillColor: color,
         color: "#fff",
-        weight: 0.5,
-        opacity: isAtRisk ? 0.9 : 0.4,
-        fillOpacity: isAtRisk ? 1.0 : 0.3
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
       });
     },
     onEachFeature: (f, layer) => {
