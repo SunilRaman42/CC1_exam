@@ -636,7 +636,7 @@ async function init() {
         }
       }
 
-      return L.circleMarker(latlng, {
+      const marker = L.circleMarker(latlng, {
         radius: radius,
         fillColor: color,
         color: "#fff",
@@ -644,6 +644,11 @@ async function init() {
         opacity: 1,
         fillOpacity: 0.8
       });
+
+      const schoolName = f.properties.name || `Lat: ${latlng.lat.toFixed(4)}, Lon: ${latlng.lng.toFixed(4)}`;
+      marker.bindTooltip(schoolName);
+      
+      return marker;
     },
     onEachFeature: (f, layer) => {
       layer.on("click", () => showSchoolDetail(f.properties, layer.getLatLng()));
