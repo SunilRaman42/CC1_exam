@@ -517,7 +517,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
       </p>
       </div>
       <div class="stats" style="justify-content: center; gap: 40px;">
-        <a href="artifacts/schools/index.html" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
+        <a href="artifacts/schools/index.html" id="schoolsLink" class="stat" style="text-decoration:none; cursor:pointer; text-align: center;">
           <div class="stat-num" id="statSchoolsAtRisk">—</div>
           <div class="stat-label" style="text-decoration:underline;">Schools at risk</div>
         </a>
@@ -678,6 +678,8 @@ async function loadAll() {
     populateStats(insights);
     drawTrend(trends);
     renderChoropleth(currentYear);
+    
+    document.getElementById("schoolsLink").href = `artifacts/schools/index.html?year=${currentYear}`;
 
     document.getElementById("loadingOverlay").classList.add("hidden");
 
@@ -732,6 +734,7 @@ function styleFeature(f) {
 document.getElementById("yearSlider").addEventListener("input", e => {
   currentYear = parseInt(e.target.value);
   document.getElementById("yearDisplay").textContent = currentYear;
+  document.getElementById("schoolsLink").href = `artifacts/schools/index.html?year=${currentYear}`;
   selectedLayer = null;
   renderChoropleth(currentYear);
   resetDetailPanel();
