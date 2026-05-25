@@ -476,7 +476,7 @@ const map = L.map("map", { center: [12.3, -1.9], zoom: 7 });
 L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
   attribution: "© OpenStreetMap © CARTO",
   maxZoom: 12,
-}).addTo(map);
+});
 
 let choroplethLayer = null;
 let schoolsLayer    = null;
@@ -559,7 +559,7 @@ async function init() {
           }
         });
       }
-    }).addTo(map);
+    });
 
     document.getElementById("toggleSchools").checked = false;
     document.getElementById("toggleHeatmap").checked = false;
@@ -650,46 +650,7 @@ async function init() {
     function renderSchools(geo) {
     if (schoolsLayer) map.removeLayer(schoolsLayer);
 
-    schoolsLayer = L.geoJSON(geo, {
-    pointToLayer: (f, latlng) => {
-      // Find score for this school
-      const schoolScore = scoreData.find(s => 
-          Math.abs(s.lat - latlng.lat) < 0.0001 && 
-          Math.abs(s.lon - latlng.lng) < 0.0001
-      );
-
-      let color = "#3498DB"; // Default blue
-      let radius = 4;
-      let isAtRisk = false;
-
-      if (schoolScore) {
-        isAtRisk = (schoolScore.at_risk_years || []).includes(currentYear);
-        if (isAtRisk) {
-            radius = 5;
-            if (schoolScore.v_score > 0.7) color = TIER_COLORS.critical;
-            else if (schoolScore.v_score > 0.5) color = TIER_COLORS.high;
-            else color = TIER_COLORS.medium;
-        }
-      }
-
-      const marker = L.circleMarker(latlng, {
-        radius: radius,
-        fillColor: color,
-        color: "#fff",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      });
-
-      const schoolName = f.properties.name || `Lat: ${latlng.lat.toFixed(4)}, Lon: ${latlng.lng.toFixed(4)}`;
-      marker.bindTooltip(schoolName);
-      
-      return marker;
-    },
-    onEachFeature: (f, layer) => {
-      layer.on("click", () => showSchoolDetail(f.properties, layer.getLatLng()));
-    }
-  }).addTo(map);
+    schoolsLayer = L.geoJSON(geo, { ... });
 }
 
 function showSchoolDetail(props, latlng) {
