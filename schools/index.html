@@ -497,10 +497,11 @@ async function init() {
   document.getElementById("backLink").href = `../index.html?year=${currentYear}`;
 
   try {
-    const [geoRes, schoolsRes, scoreRes] = await Promise.all([
+    const [geoRes, schoolsRes, scoreRes, provStatsRes] = await Promise.all([
       fetch(GEOJSON_URL).then(r => r.json()),
       fetch(SCHOOLS_URL).then(r => r.json()),
-      fetch(SCORE_URL).then(r => r.json())
+      fetch(SCORE_URL).then(r => r.json()),
+      fetch(PROV_STATS_URL).then(r => r.json())
     ]);
 
     scoreData = scoreRes;
