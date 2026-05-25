@@ -479,6 +479,7 @@ let choroplethLayer = null;
 let schoolsLayer    = null;
 let heatmapLayer    = null;
 let scoreData       = [];
+let schoolsData     = null;
 let currentYear     = 2024;
 
 async function init() {
@@ -499,6 +500,7 @@ async function init() {
     ]);
 
     scoreData = scoreRes;
+    schoolsData = schoolsRes;
     
     // Background admin boundaries for context
     choroplethLayer = L.geoJSON(geoRes, {
@@ -506,10 +508,10 @@ async function init() {
       style: { color: "#1A1410", weight: 0.5, fillOpacity: 0.05, fill: "#000" }
     }).addTo(map);
 
-    renderSchools(schoolsRes);
+    renderSchools(schoolsData);
     renderHeatmap();
 
-    document.getElementById("statSchoolsTotal").textContent = schoolsRes.features.length.toLocaleString();
+    document.getElementById("statSchoolsTotal").textContent = schoolsData.features.length.toLocaleString();
     document.getElementById("statSchoolsAtRisk").textContent = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear) && s.v_score > 0.7).length.toLocaleString();
 
     // Toggles
@@ -541,7 +543,7 @@ async function init() {
       }
 
       // Update schools and heatmap
-      renderSchools(schoolsRes);
+      renderSchools(schoolsData);
       renderHeatmap();
 
       // Update stats
@@ -556,10 +558,9 @@ async function init() {
     function updateGlobalStats() {
     // Filter scores for current year
     const activeScores = scoreData.filter(s => (s.at_risk_years || []).includes(currentYear));
-    document.getElementById("statSchoolsTotal").textContent = schoolsRes.features.length.toLocaleString();
+    document.getElementById("statSchoolsTotal").textContent = schoolsData.features.length.toLocaleString();
     document.getElementById("statSchoolsAtRisk").textContent = activeScores.filter(s => s.v_score > 0.7).length.toLocaleString();
     }
-
     function renderHeatmap() {
     if (heatmapLayer) map.removeLayer(heatmapLayer);
 
