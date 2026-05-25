@@ -77,11 +77,38 @@ async function load() {
   });
 
   const tbody = document.querySelector("#schoolTable tbody");
-  let filtered = scores.filter(s => (s.at_risk_years || []).includes(parseInt(year)) && s.v_score > 0.7);
+  // Filter based on CSV final score > 0.7 for consistency
+  const filtered = scores.filter(s => {
+      const lat = s.lat.toFixed(3);
+      const lon = s.lon.toFixed(3);
+      const key = `${lat},${lon}`;
+      const vData = vulnMap[key];
+      const isAtRisk = (s.at_risk_years || []).includes(parseInt(year));
+      const score = vData ? parseFloat(vData.final) : s.v_score;
+      
+      const matchProv = province ? s.province === province : true;
+      return isAtRisk && score > 0.7 && matchProv;
+  });
   
-  if (province) {
-      filtered = filtered.filter(s => s.province === province);
-  }
+  // Sort: Conflict Score (desc), then Fragility (desc), then Province (asc)
+  filtered.sort((a, b) => {
+      const latA = a.lat.toFixed(3);
+      const lonA = a.lon.toFixed(3);
+      const latB = b.lat.toFixed(3);
+      const lonB = b.lon.toFixed(3);
+      const vA = vulnMap[`${latA},${lonA}`] || { conflict: 0, fragility: 0 };
+      const vB = vulnMap[`${latB},${lonB}`] || { conflict: 0, fragility: 0 };
+
+      const cA = parseFloat(vA.conflict) || 0;
+      const cB = parseFloat(vB.conflict) || 0;
+      if (cB !== cA) return cB - cA;
+
+      const fA = parseFloat(vA.fragility) || 0;
+      const fB = parseFloat(vB.fragility) || 0;
+      if (fB !== fA) return fB - fA;
+
+      return a.province.localeCompare(b.province);
+  });
   
   filtered.forEach((s, index) => {
     const lat = s.lat.toFixed(3);
