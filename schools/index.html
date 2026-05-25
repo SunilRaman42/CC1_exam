@@ -522,7 +522,10 @@ async function init() {
       filter: f => f.properties.year === currentYear,
       style: (f) => {
         const priority = f.properties.priority || 'unknown';
-        const color = TIER_COLORS[priority] || TIER_COLORS.unknown;
+        // Map the priority label to the tier keys. 
+        // e.g., 'lower_priority' -> 'low', 'high_priority' -> 'high'
+        const mappedPriority = priority.replace('_priority', '');
+        const color = TIER_COLORS[mappedPriority] || TIER_COLORS.unknown;
         return { color: "#1A1410", weight: 0.5, fillColor: color, fillOpacity: 0.6 };
       },
       onEachFeature: (f, layer) => {
