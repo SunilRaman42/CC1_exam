@@ -6,10 +6,10 @@
 <style>
   body { font-family: 'IBM Plex Sans', sans-serif; padding: 40px; background: #F5F0E8; color: #1A1410; }
   h1 { font-family: 'Libre Baskerville', serif; color: #8B1A1A; }
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
   th, td { border: 1px solid #CCC; padding: 8px; text-align: left; }
   th { background: #E3DDD0; }
-  .methodology { margin-top: 40px; padding: 20px; background: #EDE8DC; border-radius: 8px; }
+  .methodology { margin-top: 40px; padding: 20px; background: #EDE8DC; border-radius: 8px; font-size: 14px; line-height: 1.6; }
   @media print { .no-print { display: none; } }
 </style>
 </head>
@@ -17,26 +17,59 @@
 <button class="no-print" onclick="window.print()">Print Report</button>
 <h1 id="title">At-Risk Schools Summary: <span id="yearVal"></span></h1>
 <table id="schoolTable">
-  <thead><tr><th>Name</th><th>Province</th><th>Lat</th><th>Lon</th><th>Score</th></tr></thead>
+  <thead><tr><th>#</th><th>Name</th><th>Province</th><th>Lat</th><th>Lon</th><th>Conflict Score</th><th>Fragility Uplift</th><th>Final Score</th></tr></thead>
   <tbody></tbody>
 </table>
 <div class="methodology">
-  <h3>Methodology</h3>
-  <p>Risk is calculated as: <em>Conflict Pressure × System Fragility</em>. Schools with a final score > 0.7 are flagged as "At Risk". Data is normalized across a 0-1 range.</p>
+  <h3>Methodology & Metric Definitions</h3>
+  <p>Risk is calculated as a composite index of conflict pressure and systemic fragility. Only schools with a <strong>Final Score > 0.7</strong> are displayed in this report.</p>
+  <ul>
+    <li><strong>Conflict Score:</strong> Measures historical and recent conflict events within a 10km radius of the school (0–1 scale).</li>
+    <li><strong>Fragility Uplift:</strong> Adjusts the risk based on regional education baseline indicators, such as out-of-school rates and survival rates (0–1 scale).</li>
+    <li><strong>Final Score:</strong> The combined composite vulnerability index used to categorize schools.</li>
+  </ul>
 </div>
 <script>
 async function load() {
   const params = new URLSearchParams(window.location.search);
   const year = params.get('year') || '2024';
   document.getElementById('yearVal').textContent = year;
-  const [scores, vulnerability] = await Promise.all([
+  
+  const [scores, vulnerabilityRaw] = await Promise.all([
     fetch("../artifacts/school_vulnerability_scores.json").then(r => r.json()),
     fetch("../artifacts/schools/BFA_school_vulnerability.csv").then(r => r.text())
   ]);
+
+  // Parse CSV vulnerability data for detailed metrics
+  const rows = vulnerabilityRaw.split('\n').slice(1);
+  const vulnMap = {};
+  rows.forEach(row => {
+    const cols = row.split(',');
+    if (cols.length >= 8) {
+        // Name is col 0, Conflict Score col 4, Fragility col 5, Final Score col 6
+        vulnMap[cols[0].trim().toLowerCase()] = {
+            conflict: cols[4],
+            fragility: cols[5],
+            final: cols[6]
+        };
+    }
+  });
+
   const tbody = document.querySelector("#schoolTable tbody");
   const filtered = scores.filter(s => (s.at_risk_years || []).includes(parseInt(year)) && s.v_score > 0.7);
-  filtered.forEach(s => {
-    const row = `<tr><td>${s.name || 'Unnamed'}</td><td>${s.province}</td><td>${s.lat}</td><td>${s.lon}</td><td>${(s.v_score*100).toFixed(0)}</td></tr>`;
+  
+  filtered.forEach((s, index) => {
+    const vData = vulnMap[s.name ? s.name.toLowerCase() : ''] || { conflict: 'N/A', fragility: 'N/A', final: (s.v_score || 0).toFixed(4) };
+    const row = `<tr>
+        <td>${index + 1}</td>
+        <td>${s.name || 'Unnamed'}</td>
+        <td>${s.province}</td>
+        <td>${s.lat.toFixed(4)}</td>
+        <td>${s.lon.toFixed(4)}</td>
+        <td>${vData.conflict}</td>
+        <td>${vData.fragility}</td>
+        <td>${vData.final}</td>
+    </tr>`;
     tbody.innerHTML += row;
   });
 }
