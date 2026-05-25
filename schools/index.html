@@ -397,7 +397,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
     <div class="stats">
       <div class="stat">
         <div class="stat-num" id="statSchoolsTotal">—</div>
-        <div class="stat-label">Schools Tracked</div>
+        <div class="stat-label">Schools</div>
       </div>
       <div class="stat">
         <div class="stat-num" id="statSchoolsAtRisk">—</div>
@@ -503,9 +503,34 @@ async function init() {
     schoolsData = schoolsRes;
     
     // Background admin boundaries for context
+    const getAtRiskCountsByProvince = (year) => {
+      const counts = {};
+      scoreData.forEach(s => {
+        if ((s.at_risk_years || []).includes(year) && s.v_score > 0.7) {
+          const prov = s.province || "Unknown";
+          counts[prov] = (counts[prov] || 0) + 1;
+        }
+      });
+      return counts;
+    };
+
+    const getProvincePriority = (provName, year) => {
+      const feat = geoRes.features.find(f => f.properties.admin2 === provName && f.properties.year === year);
+      return feat ? feat.properties.priority : 'low';
+    };
+
     choroplethLayer = L.geoJSON(geoRes, {
       filter: f => f.properties.year === currentYear,
-      style: { color: "#1A1410", weight: 0.5, fillOpacity: 0.05, fill: "#000" }
+      style: (f) => {
+        const priority = f.properties.priority || 'low';
+        const color = TIER_COLORS[priority] || TIER_COLORS.low;
+        return { color: "#1A1410", weight: 0.5, fillColor: color, fillOpacity: 0.4 };
+      },
+      onEachFeature: (f, layer) => {
+        const yearCounts = getAtRiskCountsByProvince(currentYear);
+        const count = yearCounts[f.properties.admin2] || 0;
+        layer.bindTooltip(`<strong>${f.properties.admin2}</strong><br>At-risk schools: ${count}`);
+      }
     }).addTo(map);
 
     renderSchools(schoolsData);
