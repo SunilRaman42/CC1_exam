@@ -466,6 +466,7 @@ const TIER_COLORS = {
   high:     "#E07B3B",
   medium:   "#F0C060",
   low:      "#A8C5A0",
+  unknown:  "#C8C0B0",
 };
 
 const map = L.map("map", { center: [12.3, -1.9], zoom: 7 });
@@ -522,9 +523,9 @@ async function init() {
     choroplethLayer = L.geoJSON(geoRes, {
       filter: f => f.properties.year === currentYear,
       style: (f) => {
-        const priority = f.properties.priority || 'low';
-        const color = TIER_COLORS[priority] || TIER_COLORS.low;
-        return { color: "#1A1410", weight: 0.5, fillColor: color, fillOpacity: 0.4 };
+        const priority = f.properties.priority || 'unknown';
+        const color = TIER_COLORS[priority] || TIER_COLORS.unknown;
+        return { color: "#1A1410", weight: 0.5, fillColor: color, fillOpacity: 0.6 };
       },
       onEachFeature: (f, layer) => {
         const yearCounts = getAtRiskCountsByProvince(currentYear);
@@ -532,6 +533,9 @@ async function init() {
         layer.bindTooltip(`<strong>${f.properties.admin2}</strong><br>At-risk schools: ${count}`);
       }
     }).addTo(map);
+
+    document.getElementById("toggleSchools").checked = false;
+    document.getElementById("toggleHeatmap").checked = false;
 
     renderSchools(schoolsData);
     renderHeatmap();
