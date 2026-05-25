@@ -652,6 +652,14 @@ function saveCache() {
 // ═══════════════════════════════════════════════════════
 
 async function loadAll() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const yearParam = urlParams.get('year');
+  if (yearParam) {
+    currentYear = parseInt(yearParam);
+    document.getElementById("yearSlider").value = currentYear;
+    document.getElementById("yearDisplay").textContent = currentYear;
+  }
+
   try {
     const [geojson, trends, insights] = await Promise.all([
       fetch(GEOJSON_URL).then(r => r.json()),
