@@ -460,6 +460,7 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 const GEOJSON_URL  = "../artifacts/data.geojson";
 const SCHOOLS_URL  = "../artifacts/schools.geojson";
 const SCORE_URL    = "../artifacts/school_vulnerability_scores.json";
+const PROV_STATS_URL = "../artifacts/province_at_risk_stats.json";
 
 const TIER_COLORS = {
   critical: "#8B1A1A",
@@ -481,6 +482,8 @@ let schoolsLayer    = null;
 let heatmapLayer    = null;
 let scoreData       = [];
 let schoolsData     = null;
+let provinceStats   = null;
+let selectedLayer   = null;
 let currentYear     = 2024;
 
 async function init() {
@@ -502,27 +505,12 @@ async function init() {
 
     scoreData = scoreRes;
     schoolsData = schoolsRes;
+    provinceStats = provStatsRes;
+
     const nationalEvents = geoRes.features.filter(f => f.properties.year === currentYear).reduce((s, f) => s + (f.properties.events || 0), 0);
     
     document.getElementById("statEvents").textContent = nationalEvents.toLocaleString();
     
-    // Background admin boundaries for context
-    const getAtRiskCountsByProvince = (year) => {
-      const counts = {};
-      scoreData.forEach(s => {
-        if ((s.at_risk_years || []).includes(year) && s.v_score > 0.7) {
-          const prov = s.province || "Unknown";
-          counts[prov] = (counts[prov] || 0) + 1;
-        }
-      });
-      return counts;
-    };
-
-    const getProvincePriority = (provName, year) => {
-      const feat = geoRes.features.find(f => f.properties.admin2 === provName && f.properties.year === year);
-      return feat ? feat.properties.priority : 'low';
-    };
-
     choroplethLayer = L.geoJSON(geoRes, {
       filter: f => f.properties.year === currentYear,
       style: (f) => {
@@ -531,9 +519,31 @@ async function init() {
         return { color: "#1A1410", weight: 0.5, fillColor: color, fillOpacity: 0.6 };
       },
       onEachFeature: (f, layer) => {
-        const yearCounts = getAtRiskCountsByProvince(currentYear);
-        const count = yearCounts[f.properties.admin2] || 0;
-        layer.bindTooltip(`<strong>${f.properties.admin2}</strong><br>At-risk schools: ${count}`);
+        layer.on({
+          click: e => {
+            if (selectedLayer) choroplethLayer.resetStyle(selectedLayer);
+            selectedLayer = e.target;
+            e.target.setStyle({ weight: 3, color: "#1A1410", fillOpacity: 0.8 });
+            
+            const stats = provinceStats[currentYear] || {};
+            const provData = stats[f.properties.admin2] || { count: 0 };
+            
+            document.getElementById("detailPanel").innerHTML = `
+              <div class="panel-label">Province detail</div>
+              <div class="detail-name">${f.properties.admin2}</div>
+              <div class="detail-metrics">
+                <div class="metric">
+                  <div class="metric-val">${f.properties.school_count || 0}</div>
+                  <div class="metric-label">Total Schools</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-val">${provData.count}</div>
+                  <div class="metric-label">At-Risk Schools</div>
+                </div>
+              </div>
+            `;
+          }
+        });
       }
     }).addTo(map);
 
