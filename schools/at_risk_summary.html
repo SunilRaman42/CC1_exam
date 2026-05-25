@@ -16,7 +16,8 @@
 <body>
 <button class="no-print" onclick="window.print()">Print Report</button>
 <h1 id="title">At-Risk Schools Summary: <span id="yearVal"></span></h1>
-<table id="schoolTable">
+<div id="loading" style="text-align:center; padding: 20px;">Loading data...</div>
+<table id="schoolTable" style="display:none;">
   <thead><tr><th>#</th><th>Name</th><th>Province</th><th>Lat</th><th>Lon</th><th>Conflict Score</th><th>Fragility Uplift</th><th>Final Score</th></tr></thead>
   <tbody></tbody>
 </table>
@@ -40,38 +41,62 @@ async function load() {
     fetch("../artifacts/schools/BFA_school_vulnerability.csv").then(r => r.text())
   ]);
 
-  // Parse CSV vulnerability data for detailed metrics
-  const rows = vulnerabilityRaw.split('\n').slice(1);
-  const vulnMap = {};
-  rows.forEach(row => {
-    const cols = row.split(',');
-    if (cols.length >= 8) {
-        // Name is col 0, Conflict Score col 4, Fragility col 5, Final Score col 6
-        vulnMap[cols[0].trim().toLowerCase()] = {
-            conflict: cols[4],
-            fragility: cols[5],
-            final: cols[6]
-        };
-    }
-  });
+  function parseCSVLine(text) {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+          const char = text[i];
+          if (char === '"') inQuotes = !inQuotes;
+          else if (char === ',' && !inQuotes) {
+              result.push(cur.trim());
+              cur = '';
+          } else cur += char;
+      }
+      // Column Mapping
+      // Header: name(1), lat(2), lon(3), conflict_score(4), fragility_uplift(5), final_score(6)
+      const rows = vulnerabilityRaw.split('\n').slice(1);
+      const vulnMap = {};
+      rows.forEach(row => {
+        const cols = parseCSVLine(row);
+        if (cols.length >= 7) {
+            const lat = parseFloat(cols[2]).toFixed(4);
+            const lon = parseFloat(cols[3]).toFixed(4);
+            const key = `${lat},${lon}`;
+            vulnMap[key] = {
+                conflict: cols[4],
+                fragility: cols[5],
+                final: cols[6]
+            };
+        }
+      });
 
-  const tbody = document.querySelector("#schoolTable tbody");
-  const filtered = scores.filter(s => (s.at_risk_years || []).includes(parseInt(year)) && s.v_score > 0.7);
-  
-  filtered.forEach((s, index) => {
-    const vData = vulnMap[s.name ? s.name.toLowerCase() : ''] || { conflict: 'N/A', fragility: 'N/A', final: (s.v_score || 0).toFixed(4) };
-    const row = `<tr>
-        <td>${index + 1}</td>
-        <td>${s.name || 'Unnamed'}</td>
-        <td>${s.province}</td>
-        <td>${s.lat.toFixed(4)}</td>
-        <td>${s.lon.toFixed(4)}</td>
-        <td>${vData.conflict}</td>
-        <td>${vData.fragility}</td>
-        <td>${vData.final}</td>
-    </tr>`;
-    tbody.innerHTML += row;
-  });
+      const tbody = document.querySelector("#schoolTable tbody");
+      let filtered = scores.filter(s => (s.at_risk_years || []).includes(parseInt(year)) && s.v_score > 0.7);
+
+      if (province) {
+          filtered = filtered.filter(s => s.province === province);
+      }
+
+      filtered.forEach((s, index) => {
+        const lat = s.lat.toFixed(4);
+        const lon = s.lon.toFixed(4);
+        const key = `${lat},${lon}`;
+        const vData = vulnMap[key] || { conflict: 'N/A', fragility: 'N/A', final: (s.v_score || 0).toFixed(4) };
+        const row = `<tr>
+            <td>${index + 1}</td>
+            <td>${s.name || 'Unnamed'}</td>
+            <td>${s.province}</td>
+            <td>${lat}</td>
+            <td>${lon}</td>
+            <td>${vData.conflict}</td>
+            <td>${vData.fragility}</td>
+            <td>${vData.final}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('schoolTable').style.display = 'table';
 }
 load();
 </script>
