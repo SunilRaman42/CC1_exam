@@ -457,9 +457,9 @@ html, body { height: 100%; background: var(--bg); color: var(--ink); font-family
 </div>
 
 <script>
-const GEOJSON_URL  = "../artifacts/data.geojson";
-const SCHOOLS_URL  = "../artifacts/schools.geojson";
-const SCORE_URL    = "../artifacts/school_vulnerability_scores.json";
+const GEOJSON_URL  = "../data.geojson";
+const SCHOOLS_URL  = "../schools.geojson";
+const SCORE_URL    = "../school_vulnerability_scores.json";
 
 const TIER_COLORS = {
   critical: "#8B1A1A",
@@ -563,10 +563,10 @@ function renderHeatmap() {
     blur: 15,
     maxZoom: 10,
     gradient: {
-      0.2: '#A8C5A0',
-      0.5: '#F0C060',
-      0.8: '#E07B3B',
-      1.0: '#8B1A1A'
+      0.2: "#A8C5A0",
+      0.5: "#F0C060",
+      0.8: "#E07B3B",
+      1.0: "#8B1A1A"
     }
   });
 
@@ -610,13 +610,13 @@ function renderSchools(geo) {
       });
     },
     onEachFeature: (f, layer) => {
-      layer.on('click', () => showSchoolDetail(f.properties, layer.getLatLng()));
+      layer.on("click", () => showSchoolDetail(f.properties, layer.getLatLng()));
     }
   }).addTo(map);
 }
 
 function showSchoolDetail(props, latlng) {
-  const score = scoreData.find(s => Math.abs(s.lat - latlng.lat) < 0.0001 && Math.abs(s.lon - latlng.lon) < 0.0001);
+  const score = scoreData.find(s => Math.abs(s.lat - latlng.lat) < 0.0001 && Math.abs(s.lon - latlng.lng) < 0.0001);
   if (!score) return;
 
   const name = props.name || "Unnamed Institution";
