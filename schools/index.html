@@ -564,6 +564,8 @@ async function init() {
     document.getElementById("toggleSchools").checked = false;
     document.getElementById("toggleHeatmap").checked = false;
 
+    // Do NOT add schoolsLayer or heatmapLayer to map here.
+    // They are rendered once for data, but only added on toggle.
     renderSchools(schoolsData);
     renderHeatmap();
 
