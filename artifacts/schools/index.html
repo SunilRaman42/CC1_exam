@@ -617,22 +617,6 @@ async function init() {
         weight: 1,
         opacity: 1,
         fillOpacity: 0.8
-      });        if (isAtRisk) {
-          if (schoolScore.v_score > 0.8) color = TIER_COLORS.critical;
-          else if (schoolScore.v_score > 0.5) color = TIER_COLORS.high;
-          else if (schoolScore.v_score > 0.2) color = TIER_COLORS.medium;
-        } else {
-          color = "#ccc"; // Not at risk this year
-        }
-      }
-
-      return L.circleMarker(latlng, {
-        radius: isAtRisk ? 4 : 2,
-        fillColor: color,
-        color: "#fff",
-        weight: 0.5,
-        opacity: isAtRisk ? 0.9 : 0.4,
-        fillOpacity: isAtRisk ? 1.0 : 0.3
       });
     },
     onEachFeature: (f, layer) => {
